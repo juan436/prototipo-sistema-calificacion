@@ -25,6 +25,10 @@ interface DemoState {
 }
 
 let emailCounter = 0;
+let lastOpenedAt = 0;
+
+/** Time when the last email preview was opened. */
+export const emailOpenedAt = () => lastOpenedAt;
 
 export const useDemoStore = create<DemoState>()(
   persist(
@@ -47,10 +51,16 @@ export const useDemoStore = create<DemoState>()(
         get().update((db) => {
           db.outbox.unshift({ id, kind, refId, createdAt: nowIso() });
         });
-        if (open) set({ openEmailId: id });
+        if (open) {
+          lastOpenedAt = Date.now();
+          set({ openEmailId: id });
+        }
         return id;
       },
-      openEmail: (id) => set({ openEmailId: id }),
+      openEmail: (id) => {
+        if (id) lastOpenedAt = Date.now();
+        set({ openEmailId: id });
+      },
       setDeviceTablet: (tabletId) => set({ deviceTabletId: tabletId }),
       resetDemo: () => set({ db: createSeed(), deviceTabletId: null, openEmailId: null }),
     }),
