@@ -1,14 +1,16 @@
+import type { ReactNode } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { AppLayout } from './components/AppLayout';
 import { RequireRole } from './components/RequireRole';
 import { EntryPage } from './features/access/EntryPage';
 import { PrivacyNoticePage } from './features/access/PrivacyNoticePage';
 import { RecoverAccountPage } from './features/access/RecoverAccountPage';
+import { FormEditorPage, FormsListPage } from './features/admin/FormsPages';
 import { TabletsPage } from './features/admin/TabletsPage';
 import { CustomerFeedbackPage } from './features/customer-rating/CustomerFeedbackPage';
 import { ActivationPage, CustomerFormPage, TabletEntry } from './features/customer-rating/TabletPages';
 
-const adminOnly = (el: React.ReactNode) => <RequireRole roles={['admin']}>{el}</RequireRole>;
+const adminOnly = (el: ReactNode) => <RequireRole roles={['admin']}>{el}</RequireRole>;
 
 export function AppRoutes() {
   return (
@@ -23,6 +25,8 @@ export function AppRoutes() {
 
       <Route path="/app" element={<AppLayout />}>
         <Route path="clientes" element={adminOnly(<CustomerFeedbackPage />)} />
+        <Route path="formularios" element={adminOnly(<FormsListPage />)} />
+        <Route path="formularios/:formId" element={adminOnly(<FormEditorPage />)} />
         <Route path="tabletas" element={adminOnly(<TabletsPage />)} />
         <Route path="*" element={<p className="text-slate-500">Pantalla en construcción.</p>} />
       </Route>
