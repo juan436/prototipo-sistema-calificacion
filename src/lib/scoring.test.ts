@@ -48,3 +48,23 @@ describe('computeScore', () => {
     expect(computeScore(performance.versions[0], {}).grade).toBeNull();
   });
 });
+
+describe('annexes do not change the official grade', async () => {
+  const { createSeed } = await import('../mock/seed');
+  const { annexesFor, hasAnnexes } = await import('./stats');
+  const { getVersion } = await import('./forms');
+  const { ANNEX_EMPLOYEE_ID } = await import('../mock/users');
+  const db = createSeed();
+
+  it('computes the grade only from the manager form', () => {
+    const evaluation = db.performance.find((e) => e.employeeId === ANNEX_EMPLOYEE_ID && e.period === '2026-09')!;
+    const annexes = annexesFor(db, ANNEX_EMPLOYEE_ID, '2026-09');
+    expect(hasAnnexes(annexes)).toBe(true);
+    expect(annexes.praises).toHaveLength(1);
+    expect(annexes.complaints).toHaveLength(1);
+    expect(annexes.reports).toHaveLength(1);
+    expect(annexes.acts).toHaveLength(1);
+    const form = db.forms.find((f) => f.id === evaluation.formId)!;
+    expect(computeScore(getVersion(form, evaluation.formVersion), evaluation.answers).grade).toBe(evaluation.grade);
+  });
+});
