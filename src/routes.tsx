@@ -6,6 +6,7 @@ import { EntryPage } from './features/access/EntryPage';
 import { PrivacyNoticePage } from './features/access/PrivacyNoticePage';
 import { RecoverAccountPage } from './features/access/RecoverAccountPage';
 import { FormEditorPage, FormsListPage } from './features/admin/FormsPages';
+import { EmployeeSurveyPage, SurveyAdminPage } from './features/anonymous-survey/SurveyPages';
 import { TabletsPage } from './features/admin/TabletsPage';
 import { CustomerFeedbackPage } from './features/customer-rating/CustomerFeedbackPage';
 import { ActivationPage, CustomerFormPage, TabletEntry } from './features/customer-rating/TabletPages';
@@ -25,6 +26,8 @@ export function AppRoutes() {
 
       <Route path="/app" element={<AppLayout />}>
         <Route path="clientes" element={adminOnly(<CustomerFeedbackPage />)} />
+        <Route path="encuesta" element={adminOnly(<SurveyAdminPage />)} />
+        <Route path="encuesta-mensual" element={<RequireRole roles={['employee']}><EmployeeSurveyPage /></RequireRole>} />
         <Route path="formularios" element={adminOnly(<FormsListPage />)} />
         <Route path="formularios/:formId" element={adminOnly(<FormEditorPage />)} />
         <Route path="tabletas" element={adminOnly(<TabletsPage />)} />
