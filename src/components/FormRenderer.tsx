@@ -1,5 +1,5 @@
 import type { FormVersion, Question } from '../mock/types';
-import { inputClass } from './ui';
+import { inputClass, Select } from './ui';
 
 export type Answers = Record<string, number | string>;
 
@@ -93,14 +93,14 @@ function QuestionField({
     return (
       <label className="block">
         {label}
-        <select className={inputClass} disabled={readOnly} value={String(value ?? '')} onChange={(e) => onChange(e.target.value)}>
+        <Select disabled={readOnly} value={String(value ?? '')} onChange={(e) => onChange(e.target.value)}>
           <option value="">Elige una opción</option>
           {q.options?.map((o) => (
             <option key={o.label} value={o.label}>
               {o.label}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
     );
   }

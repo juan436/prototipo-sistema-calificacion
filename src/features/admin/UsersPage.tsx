@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { UserPlus } from 'lucide-react';
 import { BranchSelect } from '../../components/filters';
-import { Badge, Button, Card, Field, inputClass, Modal, Note, PageHeader, Table, td, th } from '../../components/ui';
+import { Badge, Button, Card, Field, inputClass, Modal, Note, PageHeader, Table, td, th, Select } from '../../components/ui';
 import { formatDate, todayIso } from '../../lib/dates';
 import { branchName, roleLabel } from '../../lib/lookup';
 import type { BranchFilter } from '../../lib/stats';
@@ -121,7 +121,18 @@ export function UsersPage() {
         </Table>
       </Card>
 
-      <Modal open={adding} onClose={() => setAdding(false)} title="Agregar empleado">
+      <Modal open={adding} onClose={() => setAdding(false)} title="Agregar empleado"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setAdding(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={add} disabled={!name.trim() || !email.trim()}>
+              Agregar
+            </Button>
+          </>
+        }
+      >
         <div className="space-y-4">
           <Field label="Nombre completo">
             <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} placeholder="Nombre ficticio" />
@@ -131,61 +142,80 @@ export function UsersPage() {
           </Field>
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Puesto">
-              <select className={inputClass} value={position} onChange={(e) => setPosition(e.target.value as Position)}>
+              <Select value={position} onChange={(e) => setPosition(e.target.value as Position)}>
                 <option value="Ventas">Ventas</option>
                 <option value="Caja">Caja</option>
-              </select>
+              </Select>
             </Field>
             <Field label="Sucursal">
-              <select className={inputClass} value={newBranch} onChange={(e) => setNewBranch(e.target.value as BranchId)}>
+              <Select value={newBranch} onChange={(e) => setNewBranch(e.target.value as BranchId)}>
                 {db.branches.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </Field>
           </div>
         </div>
-        <div className="mt-5 flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => setAdding(false)}>
-            Cancelar
-          </Button>
-          <Button onClick={add} disabled={!name.trim() || !email.trim()}>
-            Agregar
-          </Button>
-        </div>
       </Modal>
 
-      <Modal open={!!deactivating} onClose={() => setDeactivating(null)} title="Desactivar usuario">
+      <Modal open={!!deactivating} onClose={() => setDeactivating(null)} title="Desactivar usuario"
+        size="sm"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setDeactivating(null)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                update((d) => {
+                  const u = d.users.find((x) => x.id === deactivating);
+                  if (u) u.active = false;
+                });
+                setDeactivating(null);
+              }}
+            >
+              Desactivar
+            </Button>
+          </>
+        }
+      >
         <p className="text-slate-600">
           {target?.name} ya no podrá entrar al sistema. Su historial (evaluaciones, felicitaciones, reportes) se conserva completo.
         </p>
-        <div className="mt-5 flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => setDeactivating(null)}>
-            Cancelar
-          </Button>
-          <Button
-            onClick={() => {
-              update((d) => {
-                const u = d.users.find((x) => x.id === deactivating);
-                if (u) u.active = false;
-              });
-              setDeactivating(null);
-            }}
-          >
-            Desactivar
-          </Button>
-        </div>
       </Modal>
 
-      <Modal open={!!moving} onClose={() => setMoving(null)} title="Cambiar de sucursal">
+      <Modal open={!!moving} onClose={() => setMoving(null)} title="Cambiar de sucursal"
+        size="sm"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setMoving(null)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                update((d) => {
+                  const u = d.users.find((x) => x.id === moving);
+                  if (u) {
+                    u.branchId = moveTo;
+                    u.branchHistory.push({ branchId: moveTo, from: todayIso() });
+                  }
+                });
+                setMoving(null);
+              }}
+            >
+              Cambiar
+            </Button>
+          </>
+        }
+      >
         <p className="text-slate-600">
           {target?.name} pasa a la nueva sucursal y a su gerente. Conserva su identificador y todo su historial.
         </p>
         <div className="mt-4">
           <Field label="Nueva sucursal">
-            <select className={inputClass} value={moveTo} onChange={(e) => setMoveTo(e.target.value as BranchId)}>
+            <Select value={moveTo} onChange={(e) => setMoveTo(e.target.value as BranchId)}>
               {db.branches
                 .filter((b) => b.id !== target?.branchId)
                 .map((b) => (
@@ -193,27 +223,8 @@ export function UsersPage() {
                     {b.name}
                   </option>
                 ))}
-            </select>
+            </Select>
           </Field>
-        </div>
-        <div className="mt-5 flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => setMoving(null)}>
-            Cancelar
-          </Button>
-          <Button
-            onClick={() => {
-              update((d) => {
-                const u = d.users.find((x) => x.id === moving);
-                if (u) {
-                  u.branchId = moveTo;
-                  u.branchHistory.push({ branchId: moveTo, from: todayIso() });
-                }
-              });
-              setMoving(null);
-            }}
-          >
-            Cambiar
-          </Button>
         </div>
       </Modal>
     </>

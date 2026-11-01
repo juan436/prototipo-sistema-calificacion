@@ -25,7 +25,7 @@ export function EmailsPage() {
     <>
       <PageHeader title="Correos" subtitle="Correos automáticos del sistema. En el prototipo no se envía nada: se muestra una vista previa." />
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+      <div className="grid gap-6 xl:grid-cols-[1fr_340px]">
         <Card title="Eventos que envían correo">
           <Table>
             <thead>

@@ -4,24 +4,7 @@ import { GradeLines, GroupedBars } from '../../components/charts';
 import { EmailPreviewCard } from '../../components/EmailPreview';
 import { BranchSelect } from '../../components/filters';
 import { FormRenderer, type Answers } from '../../components/FormRenderer';
-import {
-  Badge,
-  Button,
-  Card,
-  EmptyState,
-  ExampleTag,
-  Field,
-  GradeBadge,
-  inputClass,
-  Modal,
-  Note,
-  PageHeader,
-  StatCard,
-  Table,
-  td,
-  th,
-  ToDefine,
-} from '../../components/ui';
+import { Badge, Button, Card, EmptyState, ExampleTag, Field, GradeBadge, inputClass, Modal, Note, PageHeader, StatCard, Table, td, th, ToDefine, Select } from '../../components/ui';
 import { formatDate } from '../../lib/dates';
 import { branchAt } from '../../lib/employees';
 import { latestVersion } from '../../lib/forms';
@@ -166,13 +149,13 @@ function PeriodSelect({ value, onChange }: { value: string; onChange: (v: string
   return (
     <label className="block">
       <span className="mb-1 block text-xs font-medium text-slate-500">Periodo</span>
-      <select className={inputClass} value={value} onChange={(e) => onChange(e.target.value)}>
+      <Select value={value} onChange={(e) => onChange(e.target.value)}>
         {[...db.surveyPeriods].reverse().map((p) => (
           <option key={p.id} value={p.id}>
             {p.name} {p.status === 'open' ? '(abierto)' : ''}
           </option>
         ))}
-      </select>
+      </Select>
     </label>
   );
 }
@@ -247,7 +230,28 @@ function PeriodsTab() {
         </div>
       </Card>
 
-      <Modal open={creating} onClose={() => setCreating(false)} title="Crear periodo">
+      <Modal open={creating} onClose={() => setCreating(false)} title="Crear periodo"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setCreating(false)}>
+              Cancelar
+            </Button>
+            {!open && (
+              <Button
+                disabled={!name.trim() || !opensAt || !closesAt || closesAt < opensAt}
+                onClick={() => {
+                  update((d) => {
+                    d.surveyPeriods.push({ id: `sp-${Date.now().toString(36)}`, name: name.trim(), opensAt, closesAt, status: 'open' });
+                  });
+                  setCreating(false);
+                }}
+              >
+                Crear y abrir
+              </Button>
+            )}
+          </>
+        }
+      >
         {open ? (
           <Note tone="warning">Hay un periodo abierto ({open.name}). En el prototipo se cierra antes de crear otro.</Note>
         ) : (
@@ -268,49 +272,35 @@ function PeriodsTab() {
             </p>
           </div>
         )}
-        <div className="mt-5 flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => setCreating(false)}>
-            Cancelar
-          </Button>
-          {!open && (
-            <Button
-              disabled={!name.trim() || !opensAt || !closesAt || closesAt < opensAt}
-              onClick={() => {
-                update((d) => {
-                  d.surveyPeriods.push({ id: `sp-${Date.now().toString(36)}`, name: name.trim(), opensAt, closesAt, status: 'open' });
-                });
-                setCreating(false);
-              }}
-            >
-              Crear y abrir
-            </Button>
-          )}
-        </div>
       </Modal>
 
-      <Modal open={!!closing} onClose={() => setClosing(null)} title="Cerrar periodo">
+      <Modal open={!!closing} onClose={() => setClosing(null)} title="Cerrar periodo"
+        size="sm"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setClosing(null)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                const id = closing!;
+                update((d) => {
+                  const p = d.surveyPeriods.find((x) => x.id === id);
+                  if (p) p.status = 'closed';
+                });
+                queueEmail('survey_results', id, true);
+                setClosing(null);
+              }}
+            >
+              Cerrar y ver el correo
+            </Button>
+          </>
+        }
+      >
         <p className="text-slate-600">
           Al cerrar, ya nadie puede enviar su evaluación de este periodo y se envía automáticamente el correo con los resultados a
           la administración.
         </p>
-        <div className="mt-5 flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => setClosing(null)}>
-            Cancelar
-          </Button>
-          <Button
-            onClick={() => {
-              const id = closing!;
-              update((d) => {
-                const p = d.surveyPeriods.find((x) => x.id === id);
-                if (p) p.status = 'closed';
-              });
-              queueEmail('survey_results', id, true);
-              setClosing(null);
-            }}
-          >
-            Cerrar y ver el correo
-          </Button>
-        </div>
       </Modal>
     </>
   );
@@ -378,7 +368,7 @@ function ResultsTab() {
 
   return (
     <>
-      <div className="mb-4 grid gap-3 sm:grid-cols-3">
+      <div className="mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <PeriodSelect value={periodId} onChange={setPeriodId} />
         <BranchSelect value={branch} onChange={setBranch} />
         <div className="flex items-end">
@@ -396,7 +386,7 @@ function ResultsTab() {
         <StatCard label="Participación" value={`${result.participationPct}%`} />
         <StatCard label="Promedio general" value={<GradeBadge grade={result.average} />} hint="Escala de 0 a 10 (ejemplo)" />
       </div>
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+      <div className="mt-4 grid gap-4 xl:grid-cols-2">
         <Card title="Calificación por área y sucursal">
           <GroupedBars
             data={areaData}
@@ -429,7 +419,7 @@ function ResultsTab() {
         )}
         <p className="mt-3 text-xs text-slate-500">{ANONYMITY_NOTE}</p>
       </Card>
-      <Modal open={preview} onClose={() => setPreview(false)} title="Vista previa del correo de cierre" wide>
+      <Modal open={preview} onClose={() => setPreview(false)} title="Vista previa del correo de cierre" size="xl">
         <EmailPreviewCard email={{ kind: 'survey_results', refId: periodId }} />
       </Modal>
     </>

@@ -4,7 +4,7 @@ import { FilePlus2, Printer, ScrollText } from 'lucide-react';
 import { FormRenderer, type Answers } from '../../components/FormRenderer';
 import { LogoPlaceholder } from '../../components/LogoPlaceholder';
 import { NoPermission } from '../../components/RequireRole';
-import { Badge, Button, ButtonLink, Card, EmptyState, ExampleTag, Field, inputClass, Note, PageHeader, Table, td, th } from '../../components/ui';
+import { Badge, Button, ButtonLink, Card, EmptyState, ExampleTag, Field, inputClass, Note, PageHeader, Table, td, th, Select } from '../../components/ui';
 import { formatDate, formatDateTime, nowIso, periodOf } from '../../lib/dates';
 import { getVersion, latestVersion, versionLabel } from '../../lib/forms';
 import { branchName, userName } from '../../lib/lookup';
@@ -125,13 +125,13 @@ export function NewReportPage() {
       <Card>
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="Nombre del empleado" hint={user.role === 'manager' ? 'Solo aparecen tus empleados.' : undefined}>
-            <select className={inputClass} value={employeeId} onChange={(e) => setEmployeeId(e.target.value)}>
+            <Select value={employeeId} onChange={(e) => setEmployeeId(e.target.value)}>
               {employees.map((e) => (
                 <option key={e.id} value={e.id}>
                   {e.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </Field>
           <Field label="Sucursal">
             <input className={inputClass} disabled value={branchName(db, employee?.branchId)} />

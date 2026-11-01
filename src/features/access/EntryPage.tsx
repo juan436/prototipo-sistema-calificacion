@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Building2, ClipboardCheck, UserRound } from 'lucide-react';
 import { HOME_BY_ROLE } from '../../components/AppLayout';
 import { PublicLayout } from '../../components/PublicLayout';
-import { Button, inputClass, Note } from '../../components/ui';
+import { Button, Note, Select } from '../../components/ui';
 import { branchName } from '../../lib/lookup';
 import type { User } from '../../mock/types';
 import { useDb, useDemoStore } from '../../store/useDemoStore';
@@ -25,13 +25,13 @@ export function EntryPage() {
 
   return (
     <PublicLayout>
-      <h1 className="text-3xl font-semibold text-slate-900">Entrar como…</h1>
+      <h1 className="text-2xl font-semibold text-slate-900 sm:text-3xl">Entrar como…</h1>
       <p className="mt-2 max-w-2xl text-slate-600">
         En el sistema real cada persona entra con su usuario y contraseña. En este prototipo eliges un tipo de usuario para ver
         lo que vería.
       </p>
 
-      <div className="mt-8 grid gap-4 md:grid-cols-3">
+      <div className="mt-6 grid gap-4 sm:mt-8 md:grid-cols-2 lg:grid-cols-3">
         <div className="flex flex-col rounded-2xl border border-slate-200 p-5">
           <Building2 className="h-8 w-8 text-accent-600" />
           <h2 className="mt-3 text-lg font-semibold">Administrador general</h2>
@@ -64,13 +64,13 @@ export function EntryPage() {
           <p className="mt-1 flex-1 text-sm text-slate-600">
             Ve sus evaluaciones y su historial, y contesta la encuesta anónima del mes.
           </p>
-          <select className={`${inputClass} mt-4`} value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} aria-label="Empleado">
+          <Select className="mt-4" value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} aria-label="Empleado">
             {employees.map((e) => (
               <option key={e.id} value={e.id}>
                 {e.name} · {branchName(db, e.branchId)}
               </option>
             ))}
-          </select>
+          </Select>
           <Button
             size="lg"
             variant="secondary"

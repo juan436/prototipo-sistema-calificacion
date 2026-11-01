@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ExternalLink, Plus } from 'lucide-react';
-import { Badge, Button, Card, Field, inputClass, Modal, Note, PageHeader, Table, td, th, ToDefine } from '../../components/ui';
+import { Badge, Button, Card, Field, Modal, Note, PageHeader, Table, td, th, ToDefine, Select } from '../../components/ui';
 import { formatDateTime, nowIso } from '../../lib/dates';
 import { branchName } from '../../lib/lookup';
 import type { BranchId } from '../../mock/types';
@@ -137,13 +137,13 @@ export function TabletsPage() {
         ) : (
           <>
             <Field label="Sucursal de la tableta">
-              <select className={inputClass} value={branchId} onChange={(e) => setBranchId(e.target.value as BranchId)}>
+              <Select value={branchId} onChange={(e) => setBranchId(e.target.value as BranchId)}>
                 {db.branches.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </Field>
             <Note className="mt-4">Se genera un código de un solo uso. El personal lo escribe una vez en la tableta; el cliente nunca lo ve.</Note>
             <div className="mt-5 flex justify-end gap-2">
@@ -156,27 +156,31 @@ export function TabletsPage() {
         )}
       </Modal>
 
-      <Modal open={!!revoking} onClose={() => setRevoking(null)} title="Desautorizar tableta">
+      <Modal open={!!revoking} onClose={() => setRevoking(null)} title="Desautorizar tableta"
+        size="sm"
+        footer={
+          <>
+            <Button variant="secondary" onClick={() => setRevoking(null)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                update((d) => {
+                  const t = d.tablets.find((x) => x.id === revoking);
+                  if (t) t.status = 'revoked';
+                });
+                setRevoking(null);
+              }}
+            >
+              Desautorizar
+            </Button>
+          </>
+        }
+      >
         <p className="text-slate-600">
           La tableta deja de funcionar y vuelve a mostrar «Esta tableta no está autorizada». Las calificaciones que ya se
           registraron se conservan.
         </p>
-        <div className="mt-5 flex justify-end gap-2">
-          <Button variant="secondary" onClick={() => setRevoking(null)}>
-            Cancelar
-          </Button>
-          <Button
-            onClick={() => {
-              update((d) => {
-                const t = d.tablets.find((x) => x.id === revoking);
-                if (t) t.status = 'revoked';
-              });
-              setRevoking(null);
-            }}
-          >
-            Desautorizar
-          </Button>
-        </div>
       </Modal>
     </>
   );

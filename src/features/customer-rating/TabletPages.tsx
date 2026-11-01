@@ -16,11 +16,11 @@ function TabletShell({ children, branch }: { children: ReactNode; branch?: strin
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <DemoBanner />
-      <header className="flex items-center gap-3 px-6 py-4">
+      <header className="flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <LogoPlaceholder size="lg" />
         {branch && <div className="text-xl font-semibold text-slate-700">{branch}</div>}
       </header>
-      <main className="flex flex-1 flex-col items-center justify-center px-5 pb-10">{children}</main>
+      <main className="flex flex-1 flex-col items-center justify-center px-4 pb-8 sm:px-6 sm:pb-10">{children}</main>
       <footer className="px-6 pb-4 text-center text-xs text-slate-400">
         <Link to="/aviso-de-privacidad" className="hover:underline">
           Aviso de privacidad
@@ -103,7 +103,7 @@ export function ActivationPage() {
     <TabletShell>
       <form onSubmit={submit} className="w-full max-w-md">
         <KeyRound className="mx-auto h-12 w-12 text-accent-600" />
-        <h1 className="mt-4 text-center text-3xl font-semibold text-slate-900">Escribe el código de activación</h1>
+        <h1 className="mt-4 text-center text-2xl font-semibold text-slate-900 sm:text-3xl">Escribe el código de activación</h1>
         <p className="mt-2 text-center text-slate-500">Lo genera el administrador. Solo se hace una vez por tableta.</p>
         <input
           className={`${inputClass} mt-6 py-4 text-center font-mono text-2xl uppercase tracking-widest`}
@@ -206,16 +206,16 @@ export function CustomerFormPage() {
   if (step === 'rating') {
     return (
       <TabletShell branch={branch.name}>
-        <h1 className="text-center text-3xl font-semibold text-slate-900 sm:text-4xl">¿Cómo fue tu experiencia en {branch.questionName}?</h1>
-        <div className="mt-10 grid w-full max-w-5xl grid-cols-1 gap-4 landscape:grid-cols-5">
+        <h1 className="text-center text-2xl font-semibold text-slate-900 sm:text-4xl">¿Cómo fue tu experiencia en {branch.questionName}?</h1>
+        <div className="mt-6 grid w-full max-w-5xl sm:mt-10 grid-cols-1 gap-4 landscape:grid-cols-5">
           {RATINGS.map((r) => (
             <button
               key={r.id}
               type="button"
               onClick={() => choose(r.id)}
-              className="flex items-center gap-5 rounded-3xl border-2 border-slate-200 bg-white px-6 py-5 text-left transition hover:border-accent-500 hover:bg-accent-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent-200 landscape:flex-col landscape:py-8 landscape:text-center"
+              className="flex items-center gap-5 rounded-3xl border-2 border-slate-200 bg-white px-6 py-5 text-left transition hover:border-accent-500 hover:bg-accent-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent-200 landscape:flex-col landscape:py-5 landscape:text-center lg:landscape:py-8"
             >
-              <span className="text-5xl landscape:text-6xl" aria-hidden>
+              <span className="text-4xl sm:text-5xl lg:landscape:text-6xl" aria-hidden>
                 {r.emoji}
               </span>
               <span className="text-2xl font-semibold text-slate-800">{r.label}</span>
@@ -230,7 +230,7 @@ export function CustomerFormPage() {
     return (
       <TabletShell branch={branch.name}>
         <div className="w-full max-w-3xl">
-          <h1 className="text-center text-3xl font-semibold text-slate-900">¡Qué gusto! ¿Quieres felicitar a quien te atendió?</h1>
+          <h1 className="text-center text-2xl font-semibold text-slate-900 sm:text-3xl">¡Qué gusto! ¿Quieres felicitar a quien te atendió?</h1>
           <p className="mt-2 text-center text-lg text-slate-500">Puedes elegir a una o varias personas. Es opcional.</p>
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {staff.map((s) => {
@@ -274,7 +274,7 @@ export function CustomerFormPage() {
     return (
       <TabletShell branch={branch.name}>
         <div className="w-full max-w-3xl">
-          <h1 className="text-center text-3xl font-semibold text-slate-900">Lamentamos que tu experiencia no fuera buena</h1>
+          <h1 className="text-center text-2xl font-semibold text-slate-900 sm:text-3xl">Lamentamos que tu experiencia no fuera buena</h1>
           <p className="mt-2 text-center text-lg text-slate-500">
             Si quieres, cuéntanos qué pasó. <strong>Ningún dato es obligatorio</strong> y puedes enviar sin dar datos personales.
           </p>
@@ -331,7 +331,7 @@ export function CustomerFormPage() {
   return (
     <TabletShell branch={branch.name}>
       <CheckCircle2 className="h-20 w-20 text-accent-600" />
-      <h1 className="mt-4 text-center text-4xl font-semibold text-slate-900">¡Gracias por tu opinión!</h1>
+      <h1 className="mt-4 text-center text-3xl font-semibold text-slate-900 sm:text-4xl">¡Gracias por tu opinión!</h1>
       <p className="mt-3 text-center text-xl text-slate-500">Nos ayuda a atenderte mejor.</p>
       <p className="mt-8 text-slate-400">La pantalla vuelve al inicio en {seconds} s</p>
       <Button variant="ghost" className="mt-2" onClick={restart}>

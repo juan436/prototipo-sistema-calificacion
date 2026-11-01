@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { FileDown, FileSpreadsheet } from 'lucide-react';
 import { GradeLines, GroupedBars, HorizontalBars, RatingEvolution, RatingPie } from '../../components/charts';
 import { BranchSelect, DateInput } from '../../components/filters';
-import { Card, ExampleTag, GradeBadge, inputClass, Note, PageHeader, StatCard, Table, td, th, Button } from '../../components/ui';
+import { Card, ExampleTag, GradeBadge, Note, PageHeader, StatCard, Table, td, th, Button, Select } from '../../components/ui';
 import { formatDateTime, formatMonthTitle, lastDayOfMonth, monthRange } from '../../lib/dates';
 import { BRANCH_COLORS, branchName, ratingLabel, userName } from '../../lib/lookup';
 import { average, averageAreas, computeScore } from '../../lib/scoring';
@@ -73,50 +73,50 @@ export function DashboardPage() {
           <BranchSelect value={branch} onChange={(v) => { setBranch(v); setEmployeeId(''); }} />
           <label className="block">
             <span className="mb-1 block text-xs font-medium text-slate-500">Periodo</span>
-            <select className={inputClass} value={mode} onChange={(e) => setMode(e.target.value as PeriodMode)}>
+            <Select value={mode} onChange={(e) => setMode(e.target.value as PeriodMode)}>
               <option value="month">Mes</option>
               <option value="year">Año</option>
               <option value="custom">Fechas personalizadas</option>
-            </select>
+            </Select>
           </label>
           <label className="block">
             <span className="mb-1 block text-xs font-medium text-slate-500">Tipo de evaluación</span>
-            <select className={inputClass} value={type} onChange={(e) => setType(e.target.value as EvalType)}>
+            <Select value={type} onChange={(e) => setType(e.target.value as EvalType)}>
               <option value="all">Todas</option>
               <option value="customers">Satisfacción de clientes</option>
               <option value="survey">Empleados a empresa</option>
               <option value="performance">Desempeño de empleados</option>
-            </select>
+            </Select>
           </label>
           <label className="block">
             <span className="mb-1 block text-xs font-medium text-slate-500">Empleado</span>
-            <select className={inputClass} value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} disabled={type === 'survey'}>
+            <Select value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} disabled={type === 'survey'}>
               <option value="">Todos</option>
               {employees.map((e) => (
                 <option key={e.id} value={e.id}>
                   {e.name}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           {mode === 'month' && (
             <label className="block">
               <span className="mb-1 block text-xs font-medium text-slate-500">Mes</span>
-              <select className={inputClass} value={month} onChange={(e) => setMonth(e.target.value)}>
+              <Select value={month} onChange={(e) => setMonth(e.target.value)}>
                 {DATA_MONTHS.map((m) => (
                   <option key={m} value={m}>
                     {formatMonthTitle(m)}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
           )}
           {mode === 'year' && (
             <label className="block">
               <span className="mb-1 block text-xs font-medium text-slate-500">Año</span>
-              <select className={inputClass} value={year} onChange={(e) => setYear(e.target.value)}>
+              <Select value={year} onChange={(e) => setYear(e.target.value)}>
                 <option value="2026">2026</option>
-              </select>
+              </Select>
             </label>
           )}
           {mode === 'custom' && (
@@ -168,7 +168,7 @@ function CustomersSection({ branch, range, employeeId }: { branch: BranchFilter;
         <StatCard label="Felicitaciones" value={praises.reduce((s, p) => s + p.count, 0)} />
         <StatCard label="Quejas recibidas" value={complaints.length} />
       </div>
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+      <div className="mt-4 grid gap-4 xl:grid-cols-2">
         <Card title="Porcentaje por calificación">
           <RatingPie data={dist} />
           <table className="mt-2 w-full text-sm">
@@ -271,7 +271,7 @@ function SurveySection({ branch, range }: { branch: BranchFilter; range: Require
             />
             <StatCard label="Periodos" value={periods.length} hint={periods.map((p) => p.name.replace(' 2026', '')).join(', ')} />
           </div>
-          <div className="mt-4 grid gap-4 lg:grid-cols-2">
+          <div className="mt-4 grid gap-4 xl:grid-cols-2">
             <Card title="Resultados por área y comparación entre sucursales">
               <GroupedBars
                 data={areaNames.map((name) => ({ area: name, ...Object.fromEntries(areas.map(({ b, areas: a }) => [b.id, a.find((x) => x.area === name)?.grade ?? null])) }))}
@@ -339,7 +339,7 @@ function PerformanceSection({ branch, range, employeeId }: { branch: BranchFilte
         <StatCard label="Felicitaciones recibidas" value={praisesTotal} hint="Anexo informativo" />
         <StatCard label="Reportes disciplinarios" value={reportsTotal} hint="Anexo informativo" />
       </div>
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
+      <div className="mt-4 grid gap-4 xl:grid-cols-2">
         <Card title={employeeId ? `Evolución de ${userName(db, employeeId)}` : 'Calificación mensual promedio'}>
           <GradeLines
             data={evolutionMonths.map((m) => ({

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowDown, ArrowUp, CheckCircle2, Lock, Plus, Trash2 } from 'lucide-react';
 import { FormRenderer } from '../../components/FormRenderer';
-import { Badge, Button, ButtonLink, Card, ExampleTag, Field, inputClass, Note, PageHeader } from '../../components/ui';
+import { Badge, Button, ButtonLink, Card, ExampleTag, Field, inputClass, Note, PageHeader, Select } from '../../components/ui';
 import { formatDate, nowIso } from '../../lib/dates';
 import { getVersion, hasResponses, latestVersion, moveItem, saveFormChanges, versionLabel } from '../../lib/forms';
 import type { FormDefinition, Question, QuestionType } from '../../mock/types';
@@ -181,8 +181,7 @@ export function FormEditorPage() {
                     <input className={inputClass} value={q.text} onChange={(e) => change(i, { text: e.target.value })} aria-label="Texto de la pregunta" />
                     <div className="grid gap-3 sm:grid-cols-3">
                       <Field label="Tipo">
-                        <select
-                          className={inputClass}
+                        <Select
                           value={q.type}
                           onChange={(e) => {
                             const type = e.target.value as QuestionType;
@@ -199,7 +198,7 @@ export function FormEditorPage() {
                               {TYPE_LABEL[t]}
                             </option>
                           ))}
-                        </select>
+                        </Select>
                       </Field>
                       {q.type === 'scored' && (
                         <>

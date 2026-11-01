@@ -19,6 +19,26 @@ import type { RatingCount } from '../lib/stats';
 
 const axis = { fontSize: 12, fill: '#64748b' };
 
+/** X-axis label that wraps long category names onto several lines instead of overlapping. */
+function WrappedTick({ x = 0, y = 0, payload }: { x?: number; y?: number; payload?: { value: string } }) {
+  const words = String(payload?.value ?? '').split(' ');
+  const lines: string[] = [];
+  for (const w of words) {
+    const last = lines[lines.length - 1];
+    if (last && (last + ' ' + w).length <= 12) lines[lines.length - 1] = `${last} ${w}`;
+    else lines.push(w);
+  }
+  return (
+    <text x={x} y={y + 12} textAnchor="middle" fontSize={11} fill="#64748b">
+      {lines.map((l, i) => (
+        <tspan key={i} x={x} dy={i === 0 ? 0 : 13}>
+          {l}
+        </tspan>
+      ))}
+    </text>
+  );
+}
+
 export function RatingPie({ data }: { data: RatingCount[] }) {
   const shown = data.filter((d) => d.count > 0);
   return (
@@ -41,7 +61,7 @@ export function RatingBars({ data }: { data: RatingCount[] }) {
     <ResponsiveContainer width="100%" height={220}>
       <BarChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
         <CartesianGrid vertical={false} stroke="#e2e8f0" />
-        <XAxis dataKey="label" tick={axis} tickLine={false} axisLine={false} />
+        <XAxis dataKey="label" tick={<WrappedTick />} tickLine={false} axisLine={false} interval={0} height={32} />
         <YAxis allowDecimals={false} tick={axis} tickLine={false} axisLine={false} />
         <Tooltip formatter={(v: number) => [v, 'Evaluaciones']} />
         <Bar dataKey="count" radius={[6, 6, 0, 0]} isAnimationActive={false}>
@@ -122,7 +142,7 @@ export function GroupedBars({
     <ResponsiveContainer width="100%" height={height}>
       <BarChart data={data} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
         <CartesianGrid vertical={false} stroke="#e2e8f0" />
-        <XAxis dataKey={xKey} tick={axis} tickLine={false} axisLine={false} interval={0} />
+        <XAxis dataKey={xKey} tick={<WrappedTick />} tickLine={false} axisLine={false} interval={0} height={44} />
         <YAxis domain={domain} allowDecimals={!!domain} tick={axis} tickLine={false} axisLine={false} />
         <Tooltip />
         {series.length > 1 && <Legend wrapperStyle={{ fontSize: 12 }} />}
@@ -139,7 +159,7 @@ export function HorizontalBars({ data, color = '#2f7f82', valueLabel }: { data: 
     <ResponsiveContainer width="100%" height={Math.max(120, data.length * 34)}>
       <BarChart data={data} layout="vertical" margin={{ top: 0, right: 16, left: 8, bottom: 0 }}>
         <XAxis type="number" allowDecimals={false} tick={axis} tickLine={false} axisLine={false} />
-        <YAxis type="category" dataKey="name" width={130} tick={axis} tickLine={false} axisLine={false} />
+        <YAxis type="category" dataKey="name" width={118} tick={{ ...axis, fontSize: 11 }} tickLine={false} axisLine={false} />
         <Tooltip formatter={(v: number) => [v, valueLabel]} />
         <Bar dataKey="value" fill={color} radius={[0, 6, 6, 0]} isAnimationActive={false} />
       </BarChart>
