@@ -43,8 +43,8 @@ function Section({ title, children }: { title: string; children: ReactNode }) {
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div className="flex gap-3 py-1">
-      <div className="w-40 shrink-0 text-slate-500">{label}</div>
+    <div className="flex flex-col gap-0.5 py-1.5 sm:flex-row sm:gap-3 sm:py-1">
+      <div className="shrink-0 text-slate-500 sm:w-44">{label}</div>
       <div className="min-w-0 flex-1 font-medium text-slate-800">{children}</div>
     </div>
   );
@@ -343,27 +343,27 @@ export function EmailPreviewCard({ email }: { email: Pick<EmailMessage, 'kind' |
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200">
       <div className="space-y-1 border-b border-slate-200 bg-slate-50 px-4 py-3 text-sm">
-        <div className="flex gap-2">
-          <span className="w-16 text-slate-500">De</span>
+        <div className="flex min-w-0 gap-2">
+          <span className="w-16 shrink-0 text-slate-500">De</span>
           <span>sistema-evaluacion@ejemplo.com</span>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="w-16 text-slate-500">Para</span>
-          <span className="font-medium">{content.to}</span>
+          <span className="w-16 shrink-0 text-slate-500">Para</span>
+          <span className="min-w-0 break-all font-medium">{content.to}</span>
           <span className="text-slate-500">({content.toRole})</span>
         </div>
-        <div className="flex gap-2">
-          <span className="w-16 text-slate-500">Asunto</span>
-          <span className="font-medium">{content.subject}</span>
+        <div className="flex min-w-0 gap-2">
+          <span className="w-16 shrink-0 text-slate-500">Asunto</span>
+          <span className="min-w-0 break-words font-medium">{content.subject}</span>
         </div>
         {email.createdAt && (
           <div className="flex gap-2">
-            <span className="w-16 text-slate-500">Fecha</span>
+            <span className="w-16 shrink-0 text-slate-500">Fecha</span>
             <span>{formatDateTime(email.createdAt)}</span>
           </div>
         )}
       </div>
-      <div className="px-4 py-4 text-sm text-slate-700">{content.body}</div>
+      <div className="px-4 py-4 text-sm text-slate-700 sm:px-6 sm:py-5">{content.body}</div>
     </div>
   );
 }
@@ -378,7 +378,7 @@ export function EmailPreviewModal() {
     <Modal
       open={!!email}
       onClose={() => openEmail(null)}
-      wide
+      size="xl"
       title={
         <span className="flex items-center gap-2">
           <Mail className="h-5 w-5 text-accent-600" /> Vista previa del correo

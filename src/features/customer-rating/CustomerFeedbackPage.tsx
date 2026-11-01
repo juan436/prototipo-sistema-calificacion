@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Mail } from 'lucide-react';
 import { EmailPreviewCard } from '../../components/EmailPreview';
 import { BranchSelect, DateInput } from '../../components/filters';
-import { Badge, Button, ButtonLink, Card, inputClass, Modal, PageHeader, Table, td, th, ToDefine } from '../../components/ui';
+import { Badge, Button, ButtonLink, Card, Modal, PageHeader, Table, td, th, ToDefine, Select } from '../../components/ui';
 import { formatDateTime, formatMonthTitle, monthRange } from '../../lib/dates';
 import { branchName, ratingLabel, userName } from '../../lib/lookup';
 import { filterFeedback, type BranchFilter } from '../../lib/stats';
@@ -48,13 +48,13 @@ export function CustomerFeedbackPage() {
         <div className="flex flex-wrap items-end gap-3">
           <label className="block">
             <span className="mb-1 block text-xs font-medium text-slate-500">Mes</span>
-            <select className={inputClass} value={pickMonth} onChange={(e) => setPickMonth(e.target.value)}>
+            <Select value={pickMonth} onChange={(e) => setPickMonth(e.target.value)}>
               {months.map((m) => (
                 <option key={m} value={m}>
                   {formatMonthTitle(m)}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
           <Button onClick={() => setSummaryMonth(pickMonth)}>
             <Mail className="h-4 w-4" /> Vista previa del resumen
@@ -66,7 +66,7 @@ export function CustomerFeedbackPage() {
       </Card>
 
       <Card>
-        <div className="mb-4 grid gap-3 sm:grid-cols-4">
+        <div className="mb-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <BranchSelect value={branch} onChange={setBranch} />
           <DateInput label="Desde" value={from} onChange={setFrom} />
           <DateInput label="Hasta" value={to} onChange={setTo} />
@@ -128,7 +128,7 @@ export function CustomerFeedbackPage() {
         </Table>
       </Card>
 
-      <Modal open={!!summaryMonth} onClose={() => setSummaryMonth(null)} title="Vista previa del resumen mensual" wide>
+      <Modal open={!!summaryMonth} onClose={() => setSummaryMonth(null)} title="Vista previa del resumen mensual" size="xl">
         {summaryMonth && <EmailPreviewCard email={{ kind: 'monthly_summary', refId: summaryMonth }} />}
       </Modal>
     </>

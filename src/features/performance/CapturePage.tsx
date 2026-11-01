@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { allScoredAnswered, FormRenderer, type Answers } from '../../components/FormRenderer';
-import { Button, Card, ExampleTag, Field, GradeBadge, inputClass, Note, PageHeader } from '../../components/ui';
+import { Button, Card, ExampleTag, Field, GradeBadge, inputClass, Note, PageHeader, Select } from '../../components/ui';
 import { formatMonthTitle, monthRange, nowIso } from '../../lib/dates';
 import { latestVersion, versionLabel } from '../../lib/forms';
 import { branchName } from '../../lib/lookup';
@@ -68,27 +68,27 @@ export function CapturePage() {
         <ExampleTag>Puntos y ponderaciones de ejemplo</ExampleTag>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
+      <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
         <div className="space-y-6">
           <Card>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Empleado" hint={user.role === 'manager' ? 'Solo aparecen tus empleados.' : undefined}>
-                <select className={inputClass} value={employeeId} onChange={(e) => setEmployeeId(e.target.value)}>
+                <Select value={employeeId} onChange={(e) => setEmployeeId(e.target.value)}>
                   {employees.map((e) => (
                     <option key={e.id} value={e.id}>
                       {e.name} · {branchName(db, e.branchId)}
                     </option>
                   ))}
-                </select>
+                </Select>
               </Field>
               <Field label="Periodo evaluado">
-                <select className={inputClass} value={period} onChange={(e) => setPeriod(e.target.value)}>
+                <Select value={period} onChange={(e) => setPeriod(e.target.value)}>
                   {PERIODS.map((p) => (
                     <option key={p} value={p}>
                       {formatMonthTitle(p)}
                     </option>
                   ))}
-                </select>
+                </Select>
               </Field>
             </div>
             <p className="mt-3 text-xs text-slate-500">
@@ -130,7 +130,7 @@ export function CapturePage() {
 
         {!existing && (
           <aside>
-            <div className="sticky top-[120px] space-y-4">
+            <div className="space-y-4 xl:sticky xl:top-[124px]">
               <Card title="Calificación calculada">
                 <div className="text-center">
                   <div className="text-5xl font-semibold tabular-nums text-slate-900">{score.grade === null ? '—' : score.grade.toFixed(1)}</div>

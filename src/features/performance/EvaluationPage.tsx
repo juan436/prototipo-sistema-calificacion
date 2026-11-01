@@ -96,7 +96,7 @@ export function EvaluationPage() {
         <ExampleTag />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
+      <div className="grid gap-6 xl:grid-cols-[1fr_300px]">
         <div className="space-y-6">
           {editing && (
             <Note tone="warning">
@@ -183,7 +183,7 @@ export function EvaluationPage() {
         </div>
 
         <aside>
-          <div className="sticky top-[120px] space-y-4">
+          <div className="space-y-4 xl:sticky xl:top-[124px]">
             <Card title={editing ? 'Calificación nueva' : 'Calificación oficial'}>
               <div className="text-center">
                 <div className="text-5xl font-semibold tabular-nums text-slate-900">

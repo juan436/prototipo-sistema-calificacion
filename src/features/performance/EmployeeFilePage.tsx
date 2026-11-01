@@ -78,7 +78,7 @@ function EmployeeFile({ employeeId }: { employeeId: string }) {
         <StatCard label="Evaluaciones" value={evaluations.length} />
       </div>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
+      <div className="mt-6 grid gap-6 xl:grid-cols-2">
         <Card title="Evolución">
           <GradeLines
             data={chartData}
