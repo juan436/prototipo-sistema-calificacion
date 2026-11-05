@@ -1,21 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Mail } from 'lucide-react';
 import { EmailPreviewCard } from '../../components/EmailPreview';
+import { RatingBadge } from '../../components/RatingBadge';
 import { BranchSelect, DateInput } from '../../components/filters';
 import { Badge, Button, ButtonLink, Card, Modal, PageHeader, Table, td, th, ToDefine, Select } from '../../components/ui';
 import { formatDateTime, formatMonthTitle, monthRange } from '../../lib/dates';
-import { branchName, ratingLabel, userName } from '../../lib/lookup';
+import { branchName, userName } from '../../lib/lookup';
 import { filterFeedback, type BranchFilter } from '../../lib/stats';
-import type { Rating } from '../../mock/types';
 import { useDb, useDemoStore } from '../../store/useDemoStore';
 
-const ratingTone: Record<Rating, 'green' | 'accent' | 'slate' | 'amber' | 'red'> = {
-  excelente: 'green',
-  bien: 'accent',
-  regular: 'slate',
-  mal: 'amber',
-  muy_mal: 'red',
-};
 
 export function CustomerFeedbackPage() {
   const db = useDb();
@@ -96,7 +89,7 @@ export function CustomerFeedbackPage() {
                   <td className={`${td} whitespace-nowrap`}>{formatDateTime(f.createdAt)}</td>
                   <td className={td}>{branchName(db, f.branchId)}</td>
                   <td className={td}>
-                    <Badge tone={ratingTone[f.rating]}>{ratingLabel(f.rating)}</Badge>
+                    <RatingBadge rating={f.rating} />
                   </td>
                   <td className={td}>
                     {f.praisedEmployeeIds.length > 0 && (

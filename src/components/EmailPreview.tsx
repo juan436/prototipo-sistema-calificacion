@@ -15,6 +15,7 @@ import {
 import type { EmailMessage, MockDb } from '../mock/types';
 import { useDb, useDemoStore } from '../store/useDemoStore';
 import { GroupedBars, RatingBars } from './charts';
+import { RatingBadge } from './RatingBadge';
 import { GradeBadge, Modal, Note, ToDefine } from './ui';
 
 export const EMAIL_KIND_LABEL: Record<EmailMessage['kind'], string> = {
@@ -69,7 +70,7 @@ export function emailContent(db: MockDb, email: Pick<EmailMessage, 'kind' | 'ref
             <Row label="Sucursal">{branchName(db, f.branchId)}</Row>
             <Row label="Fecha">{formatDate(f.createdAt)}</Row>
             <Row label="Hora">{formatTime(f.createdAt)}</Row>
-            <Row label="Calificación">{ratingLabel(f.rating)}</Row>
+            <Row label="Calificación"><RatingBadge rating={f.rating} /></Row>
             <Row label="Empleado señalado">{f.complaint?.employeeId ? userName(db, f.complaint.employeeId) : 'No lo indicó'}</Row>
             <Row label="Comentario">{f.complaint?.whatHappened || f.comment || 'Sin comentario'}</Row>
             {f.complaint?.phone && <Row label="Teléfono de contacto">{f.complaint.phone}</Row>}

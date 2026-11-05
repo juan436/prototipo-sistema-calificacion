@@ -213,12 +213,13 @@ export function CustomerFormPage() {
               key={r.id}
               type="button"
               onClick={() => choose(r.id)}
-              className="flex items-center gap-5 rounded-3xl border-2 border-slate-200 bg-white px-6 py-5 text-left transition hover:border-accent-500 hover:bg-accent-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent-200 landscape:flex-col landscape:py-5 landscape:text-center lg:landscape:py-8"
+              style={{ background: r.color, color: r.text }}
+              className="flex items-center gap-5 rounded-3xl px-6 py-5 text-left shadow-sm transition hover:brightness-95 active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-400 focus-visible:ring-offset-2 landscape:flex-col landscape:py-5 landscape:text-center lg:landscape:py-8"
             >
               <span className="text-4xl sm:text-5xl lg:landscape:text-6xl" aria-hidden>
                 {r.emoji}
               </span>
-              <span className="text-2xl font-semibold text-slate-800">{r.label}</span>
+              <span className="text-2xl font-semibold">{r.label}</span>
             </button>
           ))}
         </div>

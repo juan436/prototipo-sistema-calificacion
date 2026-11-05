@@ -2,9 +2,10 @@ import { useMemo, useState } from 'react';
 import { FileDown, FileSpreadsheet } from 'lucide-react';
 import { GradeLines, GroupedBars, HorizontalBars, RatingEvolution, RatingPie } from '../../components/charts';
 import { BranchSelect, DateInput } from '../../components/filters';
+import { RatingBadge } from '../../components/RatingBadge';
 import { Card, ExampleTag, GradeBadge, Note, PageHeader, StatCard, Table, td, th, Button, Select } from '../../components/ui';
 import { formatDateTime, formatMonthTitle, lastDayOfMonth, monthRange } from '../../lib/dates';
-import { BRANCH_COLORS, branchName, ratingLabel, userName } from '../../lib/lookup';
+import { BRANCH_COLORS, branchName, userName } from '../../lib/lookup';
 import { average, averageAreas, computeScore } from '../../lib/scoring';
 import { getVersion } from '../../lib/forms';
 import {
@@ -226,7 +227,7 @@ function CustomersSection({ branch, range, employeeId }: { branch: BranchFilter;
                 <tr key={f.id}>
                   <td className={`${td} whitespace-nowrap`}>{formatDateTime(f.createdAt)}</td>
                   <td className={td}>{branchName(db, f.branchId)}</td>
-                  <td className={td}>{ratingLabel(f.rating)}</td>
+                  <td className={td}><RatingBadge rating={f.rating} /></td>
                   <td className={td}>{f.complaint?.employeeId ? userName(db, f.complaint.employeeId) : '—'}</td>
                   <td className={td}>{f.complaint?.whatHappened ?? '—'}</td>
                 </tr>
