@@ -40,7 +40,10 @@ export interface Complaint {
 export interface CustomerFeedback {
   id: string;
   branchId: BranchId;
+  /** Tablet = register (caja): each register has its own tablet. */
   tabletId: string;
+  /** Cashier in session on that tablet when the customer rated. */
+  cashierId?: string;
   /** ISO date-time. */
   createdAt: string;
   rating: Rating;
@@ -165,6 +168,10 @@ export interface Tablet {
   id: string;
   name: string;
   branchId: BranchId;
+  /** Register (caja) where the tablet is, e.g. «Caja 1». */
+  register: string;
+  /** One 4-digit PIN per tablet, used to change the cashier in session. */
+  pin: string;
   status: 'authorized' | 'revoked';
   createdAt: string;
 }
@@ -172,9 +179,22 @@ export interface Tablet {
 export interface ActivationCode {
   code: string;
   branchId: BranchId;
+  register: string;
+  pin: string;
   createdAt: string;
   usedAt?: string;
   tabletId?: string;
+}
+
+/**
+ * A cashier taking over a tablet. The session stays open until the next one starts on the same tablet:
+ * there is no shift schedule, the shift is simply the change of cashier.
+ */
+export interface CashierSession {
+  id: string;
+  tabletId: string;
+  employeeId: string;
+  startedAt: string;
 }
 
 export type EmailKind =
@@ -205,6 +225,7 @@ export interface MockDb {
   acts: AdministrativeAct[];
   tablets: Tablet[];
   activationCodes: ActivationCode[];
+  cashierSessions: CashierSession[];
   outbox: EmailMessage[];
   settings: {
     adminEmail: string;

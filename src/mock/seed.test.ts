@@ -65,8 +65,8 @@ describe('demo data', () => {
     expect(new Set(db.performance.filter((e) => e.employeeId === moved.id).map((e) => e.branchId)).size).toBe(2);
   });
 
-  it('has 2 authorized tablets and 1 revoked', () => {
-    expect(db.tablets.filter((t) => t.status === 'authorized')).toHaveLength(2);
+  it('has 2 authorized tablets per branch and 1 revoked', () => {
+    expect(db.tablets.filter((t) => t.status === 'authorized')).toHaveLength(4);
     expect(db.tablets.filter((t) => t.status === 'revoked')).toHaveLength(1);
   });
 });

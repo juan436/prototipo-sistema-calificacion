@@ -68,6 +68,8 @@ export function emailContent(db: MockDb, email: Pick<EmailMessage, 'kind' | 'ref
           <Section title="Detalle">
             <Row label="Motivo">{f.rating === 'muy_mal' && f.complaint ? 'Calificación «Muy mal» con queja' : reason}</Row>
             <Row label="Sucursal">{branchName(db, f.branchId)}</Row>
+            <Row label="Caja">{db.tablets.find((t) => t.id === f.tabletId)?.register ?? '—'}</Row>
+            <Row label="Cajero en sesión">{f.cashierId ? userName(db, f.cashierId) : 'Sin cajero en sesión'}</Row>
             <Row label="Fecha">{formatDate(f.createdAt)}</Row>
             <Row label="Hora">{formatTime(f.createdAt)}</Row>
             <Row label="Calificación"><RatingBadge rating={f.rating} /></Row>

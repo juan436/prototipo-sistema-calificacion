@@ -33,7 +33,7 @@ export function CustomerFeedbackPage() {
     <>
       <PageHeader
         title="Calificaciones de clientes"
-        subtitle="Cada envío desde la tableta queda registrado con fecha y hora exactas. Las dos sucursales se guardan por separado."
+        subtitle="Cada envío queda registrado con fecha y hora exactas, la caja donde se hizo y el cajero en sesión. Las dos sucursales se guardan por separado."
         actions={<ButtonLink to="/app/panel" variant="secondary">Ver estadísticas</ButtonLink>}
       />
 
@@ -68,12 +68,16 @@ export function CustomerFeedbackPage() {
             Solo quejas y «Muy mal»
           </label>
         </div>
-        <div className="mb-2 text-sm text-slate-500">{list.length} registros</div>
+        <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+          {list.length} registros ·
+          <ToDefine>si el cliente señala a otro empleado, ¿la calificación cuenta para el bono del cajero en sesión o solo para el señalado?</ToDefine>
+        </div>
         <Table>
           <thead>
             <tr>
               <th className={th}>Fecha y hora</th>
               <th className={th}>Sucursal</th>
+              <th className={th}>Caja y cajero en sesión</th>
               <th className={th}>Calificación</th>
               <th className={th}>Empleados mencionados</th>
               <th className={th}>Comentario o queja</th>
@@ -88,6 +92,10 @@ export function CustomerFeedbackPage() {
                 <tr key={f.id}>
                   <td className={`${td} whitespace-nowrap`}>{formatDateTime(f.createdAt)}</td>
                   <td className={td}>{branchName(db, f.branchId)}</td>
+                  <td className={td}>
+                    <div>{db.tablets.find((t) => t.id === f.tabletId)?.register ?? '—'}</div>
+                    <div className="text-xs text-slate-500">{f.cashierId ? userName(db, f.cashierId) : 'Sin cajero en sesión'}</div>
+                  </td>
                   <td className={td}>
                     <RatingBadge rating={f.rating} />
                   </td>

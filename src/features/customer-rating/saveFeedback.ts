@@ -1,3 +1,4 @@
+import { currentSession } from '../../lib/cashier';
 import { nowIso } from '../../lib/dates';
 import type { Complaint, CustomerFeedback, Rating, Tablet } from '../../mock/types';
 import { useDemoStore } from '../../store/useDemoStore';
@@ -25,6 +26,8 @@ export function saveFeedback(tablet: Tablet, input: FeedbackInput): string | nul
     id: `cf-${Date.now().toString(36)}`,
     branchId: tablet.branchId,
     tabletId: tablet.id,
+    // Linked to the cashier in session on this tablet right now.
+    cashierId: currentSession(store.db, tablet.id)?.employeeId,
     createdAt: nowIso(),
     rating: input.rating,
     praisedEmployeeIds: input.rating === 'excelente' ? input.praisedEmployeeIds ?? [] : [],

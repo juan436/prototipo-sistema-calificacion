@@ -1,3 +1,4 @@
+import { sessionAt } from '../lib/cashier';
 import { branchAt, staffAt } from '../lib/employees';
 import { computeScore } from '../lib/scoring';
 import { BRANCHES } from './branches';
@@ -8,6 +9,7 @@ import type {
   AdministrativeAct,
   AnonymousResponse,
   BranchId,
+  CashierSession,
   CustomerFeedback,
   DisciplinaryReport,
   EmailMessage,
@@ -84,42 +86,82 @@ function addDays(date: string, days: number): string {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
 
+export const EXAMPLE_ACTIVATION_PIN = '4821';
+
 function createTablets(): { tablets: Tablet[]; codes: ActivationCode[] } {
+  // Each register (caja) has its own tablet. One 4-digit PIN per tablet (example values).
   const tablets: Tablet[] = [
-    { id: 't1', name: 'Tableta de mostrador · Ferreisla', branchId: 'ferreisla', status: 'authorized', createdAt: '2026-07-20T10:00:00' },
-    { id: 't2', name: 'Tableta de mostrador · La Gloria', branchId: 'lagloria', status: 'authorized', createdAt: '2026-07-20T11:00:00' },
-    { id: 't3', name: 'Tableta de caja · Ferreisla', branchId: 'ferreisla', status: 'revoked', createdAt: '2026-07-21T09:30:00' },
+    { id: 't1', name: 'Caja 1 · Ferreisla', register: 'Caja 1', pin: '2580', branchId: 'ferreisla', status: 'authorized', createdAt: '2026-07-20T10:00:00' },
+    { id: 't4', name: 'Caja 2 · Ferreisla', register: 'Caja 2', pin: '3690', branchId: 'ferreisla', status: 'authorized', createdAt: '2026-07-20T10:20:00' },
+    { id: 't2', name: 'Caja 1 · La Gloria', register: 'Caja 1', pin: '1470', branchId: 'lagloria', status: 'authorized', createdAt: '2026-07-20T11:00:00' },
+    { id: 't5', name: 'Caja 2 · La Gloria', register: 'Caja 2', pin: '7410', branchId: 'lagloria', status: 'authorized', createdAt: '2026-07-20T11:20:00' },
+    { id: 't3', name: 'Caja 3 · Ferreisla', register: 'Caja 3', pin: '9632', branchId: 'ferreisla', status: 'revoked', createdAt: '2026-07-21T09:30:00' },
   ];
   const codes: ActivationCode[] = [
-    { code: 'FI-2M8XP', branchId: 'ferreisla', createdAt: '2026-07-20T09:55:00', usedAt: '2026-07-20T10:00:00', tabletId: 't1' },
-    { code: 'LG-9QW4T', branchId: 'lagloria', createdAt: '2026-07-20T10:50:00', usedAt: '2026-07-20T11:00:00', tabletId: 't2' },
-    { code: 'FI-5RT2H', branchId: 'ferreisla', createdAt: '2026-07-21T09:20:00', usedAt: '2026-07-21T09:30:00', tabletId: 't3' },
-    { code: EXAMPLE_ACTIVATION_CODE, branchId: 'ferreisla', createdAt: '2026-10-30T16:00:00' },
+    { code: 'FI-2M8XP', branchId: 'ferreisla', register: 'Caja 1', pin: '2580', createdAt: '2026-07-20T09:55:00', usedAt: '2026-07-20T10:00:00', tabletId: 't1' },
+    { code: 'FI-7HD3K', branchId: 'ferreisla', register: 'Caja 2', pin: '3690', createdAt: '2026-07-20T10:15:00', usedAt: '2026-07-20T10:20:00', tabletId: 't4' },
+    { code: 'LG-9QW4T', branchId: 'lagloria', register: 'Caja 1', pin: '1470', createdAt: '2026-07-20T10:50:00', usedAt: '2026-07-20T11:00:00', tabletId: 't2' },
+    { code: 'LG-4NB8R', branchId: 'lagloria', register: 'Caja 2', pin: '7410', createdAt: '2026-07-20T11:15:00', usedAt: '2026-07-20T11:20:00', tabletId: 't5' },
+    { code: 'FI-5RT2H', branchId: 'ferreisla', register: 'Caja 3', pin: '9632', createdAt: '2026-07-21T09:20:00', usedAt: '2026-07-21T09:30:00', tabletId: 't3' },
+    // Replacement tablet for Caja 3, ready to be activated in the demo.
+    { code: EXAMPLE_ACTIVATION_CODE, branchId: 'ferreisla', register: 'Caja 3', pin: EXAMPLE_ACTIVATION_PIN, createdAt: '2026-10-30T16:00:00' },
   ];
   return { tablets, codes };
 }
 
-function createCustomerFeedback(users: User[]): CustomerFeedback[] {
+/**
+ * Cashier sessions. Caja 1 of each branch changes cashier every day at 2 p.m. (two different cashiers,
+ * so the turns can be compared); Caja 2 keeps the same cashier in session the whole time.
+ */
+function createCashierSessions(): CashierSession[] {
+  const sessions: CashierSession[] = [];
+  const daily: { tabletId: string; morning: string; afternoon: string }[] = [
+    { tabletId: 't1', morning: 'e02', afternoon: 'e03' }, // Mariana López / Luis Ramírez
+    { tabletId: 't2', morning: 'e10', afternoon: 'e13' }, // Miguel Ángel Rosas / Paola Medina
+  ];
+  for (const { tabletId, morning, afternoon } of daily) {
+    for (let day = '2026-07-20'; day <= DEMO_TODAY; day = addDays(day, 1)) {
+      sessions.push({ id: `cs-${tabletId}-${day}-am`, tabletId, employeeId: morning, startedAt: iso(day, 8, 0) });
+      sessions.push({ id: `cs-${tabletId}-${day}-pm`, tabletId, employeeId: afternoon, startedAt: iso(day, 14, 0) });
+    }
+  }
+  sessions.push(
+    { id: 'cs-t4-start', tabletId: 't4', employeeId: 'e06', startedAt: '2026-07-20T10:25:00' }, // Ricardo Navarro
+    { id: 'cs-t5-start', tabletId: 't5', employeeId: 'e12', startedAt: '2026-07-20T11:25:00' }, // Héctor Aguilar
+  );
+  return sessions;
+}
+
+/** Example rating mix per cashier, so the turns show different results. */
+const CASHIER_RATING_MIX: Record<string, [Rating, number][]> = {
+  e02: [['excelente', 55], ['bien', 28], ['regular', 10], ['mal', 7]],
+  e03: [['excelente', 26], ['bien', 32], ['regular', 25], ['mal', 17]],
+  e06: [['excelente', 38], ['bien', 30], ['regular', 18], ['mal', 14]],
+  e10: [['excelente', 46], ['bien', 30], ['regular', 14], ['mal', 10]],
+  e13: [['excelente', 30], ['bien', 32], ['regular', 22], ['mal', 16]],
+  e12: [['excelente', 40], ['bien', 30], ['regular', 18], ['mal', 12]],
+};
+
+const REGISTERS_BY_BRANCH: Record<BranchId, [string, string]> = { ferreisla: ['t1', 't4'], lagloria: ['t2', 't5'] };
+
+function createCustomerFeedback(users: User[], sessions: CashierSession[]): CustomerFeedback[] {
   const rnd = createRandom(20260801);
   const records: Omit<CustomerFeedback, 'id'>[] = [];
   const start = '2026-08-01';
   const totalDays = 91; // August 1 to October 30
 
   for (const branch of BRANCHES) {
-    for (let i = 0; i < 48; i++) {
+    for (let i = 0; i < 55; i++) {
       const date = addDays(start, rnd.int(0, totalDays - 1));
-      const rating = rnd.weighted<Rating>([
-        ['excelente', 40],
-        ['bien', 30],
-        ['regular', 18],
-        ['mal', 12],
-      ]);
-      const tabletId =
-        branch.id === 'lagloria' ? 't2' : date < '2026-09-30' && rnd.next() < 0.3 ? 't3' : 't1';
+      const createdAt = iso(date, rnd.int(9, 18), rnd.int(0, 59));
+      const [caja1, caja2] = REGISTERS_BY_BRANCH[branch.id];
+      const tabletId = rnd.next() < 0.6 ? caja1 : caja2;
+      const cashierId = sessionAt(sessions, tabletId, createdAt)?.employeeId;
+      const rating = rnd.weighted<Rating>(CASHIER_RATING_MIX[cashierId ?? ''] ?? CASHIER_RATING_MIX.e06);
       const record: Omit<CustomerFeedback, 'id'> = {
         branchId: branch.id,
         tabletId,
-        createdAt: iso(date, rnd.int(9, 18), rnd.int(0, 59)),
+        createdAt,
         rating,
         praisedEmployeeIds: [],
       };
@@ -143,7 +185,7 @@ function createCustomerFeedback(users: User[]): CustomerFeedback[] {
   records.push(
     {
       branchId: 'ferreisla',
-      tabletId: 't1',
+      tabletId: 't4',
       createdAt: '2026-08-22T13:40:00',
       rating: 'muy_mal',
       praisedEmployeeIds: [],
@@ -183,7 +225,7 @@ function createCustomerFeedback(users: User[]): CustomerFeedback[] {
     },
     {
       branchId: 'lagloria',
-      tabletId: 't2',
+      tabletId: 't5',
       createdAt: '2026-10-03T10:20:00',
       rating: 'mal',
       praisedEmployeeIds: [],
@@ -201,7 +243,11 @@ function createCustomerFeedback(users: User[]): CustomerFeedback[] {
 
   return records
     .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
-    .map((r, i) => ({ ...r, id: `cf-${String(i + 1).padStart(3, '0')}` }));
+    .map((r, i) => ({
+      ...r,
+      cashierId: sessionAt(sessions, r.tabletId, r.createdAt)?.employeeId,
+      id: `cf-${String(i + 1).padStart(3, '0')}`,
+    }));
 }
 
 const PERFORMANCE_PERIODS = ['2026-07', '2026-08', '2026-09'];
@@ -411,7 +457,8 @@ function createOutbox(feedback: CustomerFeedback[], evaluations: PerformanceEval
 export function createSeed(): MockDb {
   const users = createUsers();
   const forms = createForms();
-  const customerFeedback = createCustomerFeedback(users);
+  const cashierSessions = createCashierSessions();
+  const customerFeedback = createCustomerFeedback(users, cashierSessions);
   const performance = createPerformance(users, forms);
   const { periods, participation, responses } = createSurvey(users);
   const { reports, acts } = createDisciplinary();
@@ -430,6 +477,7 @@ export function createSeed(): MockDb {
     acts,
     tablets,
     activationCodes: codes,
+    cashierSessions,
     outbox: createOutbox(customerFeedback, performance),
     settings: { adminEmail: 'administracion@ejemplo.com' },
   };
