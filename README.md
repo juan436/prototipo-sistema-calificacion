@@ -39,7 +39,7 @@ Detallados en [`docs/CAMBIOS-PEDIDOS.md`](docs/CAMBIOS-PEDIDOS.md):
 3. Toca el nombre del cajero en la esquina superior, pulsa **Cambiar cajero**, escribe el PIN de ejemplo que aparece en la nota y elige a otro cajero. Las calificaciones siguientes quedan a su nombre.
 4. Pulsa **Simular que se cae el internet** en el pie de la tableta, califica, y vuelve a activar el internet: la calificación se envía sola en unos segundos.
 5. Regresa al panel: la calificación aparece en **Calificaciones de clientes** (con caja y cajero) y en **Correos**. En **Panel** compara los clientes satisfechos por sucursal y por cajero.
-6. Abre el expediente de **Carlos Vega** (anexos que no cambian su nota), **Daniel Ortega** (trasladado de sucursal) y la evaluación de septiembre de **Mariana López** (modificada, con historial).
+6. Abre el expediente de **Paola Medina** (cajera con anexos que no cambian su nota), **Daniel Ortega** (trasladado de sucursal) y la evaluación de septiembre de **Mariana López** (modificada, con historial).
 7. En **Formularios → Desempeño · Vendedores** edita y guarda: se crea una versión nueva y las evaluaciones anteriores conservan la suya.
 8. Entra como **gerente** para evaluar a un empleado de octubre (cada rol ve su cuestionario), y como **empleado** para contestar la encuesta anónima.
 

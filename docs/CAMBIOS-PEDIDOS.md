@@ -59,6 +59,8 @@ Ferreisla tiene dos cajas. La Caja 1 y la Caja 2 tienen cada una su tableta.
 
 Si el cliente señala a **otro empleado** en «¿Quién te atendió?», ¿esa calificación cuenta para el bono del cajero en sesión, o solo para el empleado señalado? Mientras no se responda, se marca **«Por definir»**.
 
+**Respondido:** el formulario del cliente ya **no pregunta «¿Quién te atendió?»**. La calificación y la queja quedan ancladas al cajero en sesión en esa caja en el momento en que el cliente califica.
+
 ---
 
 ## 2. Color en cada calificación

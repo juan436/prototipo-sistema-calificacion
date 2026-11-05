@@ -26,8 +26,8 @@ export const MANAGER_LAGLORIA_ID = 'u-mgr-lg';
 /** Employee moved from Ferreisla to La Gloria; keeps the whole history. */
 export const TRANSFERRED_EMPLOYEE_ID = 'e05';
 export const TRANSFER_DATE = '2026-08-16';
-/** Employee whose file has annexes (praise, complaint, disciplinary report and act). */
-export const ANNEX_EMPLOYEE_ID = 'e09';
+/** Cashier whose file has annexes (praise, complaint, disciplinary report and act). */
+export const ANNEX_EMPLOYEE_ID = 'e13';
 /** Employee with a modified evaluation. */
 export const MODIFIED_EMPLOYEE_ID = 'e02';
 

@@ -38,8 +38,7 @@ export function filterFeedback(
     if (
       opts.employeeId &&
       f.cashierId !== opts.employeeId &&
-      !f.praisedEmployeeIds.includes(opts.employeeId) &&
-      f.complaint?.employeeId !== opts.employeeId
+      !f.praisedEmployeeIds.includes(opts.employeeId)
     ) {
       return false;
     }
@@ -154,7 +153,8 @@ export function annexesFor(db: MockDb, employeeId: string, period?: string): Ann
   const reports = db.disciplinaryReports.filter((r) => r.employeeId === employeeId && (!period || r.period === period));
   return {
     praises: db.customerFeedback.filter((f) => f.praisedEmployeeIds.includes(employeeId) && match(f.createdAt)),
-    complaints: db.customerFeedback.filter((f) => f.complaint?.employeeId === employeeId && match(f.createdAt)),
+    // A complaint belongs to the cashier in session when the customer rated.
+    complaints: db.customerFeedback.filter((f) => !!f.complaint && f.cashierId === employeeId && match(f.createdAt)),
     reports,
     acts: db.acts.filter((a) => reports.some((r) => r.id === a.reportId)),
   };

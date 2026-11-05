@@ -190,7 +190,6 @@ function createCustomerFeedback(users: User[], sessions: CashierSession[]): Cust
       rating: 'muy_mal',
       praisedEmployeeIds: [],
       complaint: {
-        employeeId: 'e06',
         whatHappened: 'Esperé mucho tiempo en la caja y al final no me entregaron mi ticket.',
         phone: '555 010 2233',
       },
@@ -209,7 +208,7 @@ function createCustomerFeedback(users: User[], sessions: CashierSession[]): Cust
       createdAt: '2026-09-08T11:15:00',
       rating: 'mal',
       praisedEmployeeIds: [],
-      complaint: { employeeId: 'e04', whatHappened: 'Me cobraron un precio distinto al de la etiqueta.' },
+      complaint: { whatHappened: 'Me cobraron un precio distinto al de la etiqueta.' },
     },
     {
       branchId: 'lagloria',
@@ -218,8 +217,7 @@ function createCustomerFeedback(users: User[], sessions: CashierSession[]): Cust
       rating: 'mal',
       praisedEmployeeIds: [],
       complaint: {
-        employeeId: ANNEX_EMPLOYEE_ID,
-        whatHappened: 'Me atendieron con prisa y no revisaron si la pieza era la correcta.',
+        whatHappened: 'Me cobraron con prisa y no revisaron si la pieza era la correcta.',
         phone: '555 014 8890',
       },
     },
@@ -234,10 +232,10 @@ function createCustomerFeedback(users: User[], sessions: CashierSession[]): Cust
     {
       branchId: 'lagloria',
       tabletId: 't2',
-      createdAt: '2026-09-05T12:10:00',
+      createdAt: '2026-09-05T15:40:00',
       rating: 'excelente',
       praisedEmployeeIds: [ANNEX_EMPLOYEE_ID],
-      comment: 'Carlos me ayudó a encontrar justo lo que necesitaba.',
+      comment: 'Paola me atendió muy amable y rápido en la caja.',
     },
   );
 
@@ -405,10 +403,10 @@ function createDisciplinary(): { reports: DisciplinaryReport[]; acts: Administra
       formId: FORM_IDS.disciplinary,
       formVersion: 1,
       answers: {
-        'd-datetime': '2026-09-24T12:30',
+        'd-datetime': '2026-09-24T15:10',
         'd-type': 'Incumplimiento de un procedimiento',
-        'd-facts': 'Entregó mercancía de bodega sin registrar la salida en el sistema de inventario.',
-        'd-notes': 'Se revisó el procedimiento de salidas de bodega con el empleado.',
+        'd-facts': 'Hizo una devolución en caja sin el ticket original ni la autorización de la gerencia.',
+        'd-notes': 'Se revisó con la empleada el procedimiento de devoluciones.',
       },
     },
   ];
@@ -422,9 +420,9 @@ function createDisciplinary(): { reports: DisciplinaryReport[]; acts: Administra
       formVersion: 1,
       answers: {
         'act-place': 'Oficina de la gerencia, Ferretería La Gloria',
-        'act-statement': 'El empleado reconoce que no registró la salida por atender a varios clientes al mismo tiempo.',
+        'act-statement': 'La empleada reconoce que hizo la devolución sin autorización porque el cliente tenía prisa.',
         'act-witnesses': 'Héctor Aguilar',
-        'act-agreements': 'Registrar toda salida de bodega antes de entregar la mercancía. Repaso del procedimiento el 30 de septiembre.',
+        'act-agreements': 'Toda devolución requiere el ticket original y la firma de la gerencia. Repaso del procedimiento el 30 de septiembre.',
       },
     },
   ];

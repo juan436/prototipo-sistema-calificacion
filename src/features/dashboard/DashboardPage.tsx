@@ -156,7 +156,7 @@ function CustomersSection({ branch, range, employeeId }: { branch: BranchFilter;
   const list = filterFeedback(db, { branch, range, employeeId: employeeId || undefined });
   const dist = ratingDistribution(list);
   const praises = praisesByEmployee(db, list).filter((p) => !employeeId || p.employeeId === employeeId);
-  const complaints = complaintsOf(list).filter((f) => !employeeId || f.complaint?.employeeId === employeeId);
+  const complaints = complaintsOf(list).filter((f) => !employeeId || f.cashierId === employeeId);
   const months = rangeMonths(range).filter((m) => db.customerFeedback.some((f) => f.createdAt.startsWith(m)));
   const byBranch = db.branches
     .filter((b) => branch === 'all' || b.id === branch)
@@ -262,7 +262,6 @@ function CustomersSection({ branch, range, employeeId }: { branch: BranchFilter;
         )}
         <div className="mt-4 flex flex-wrap gap-2">
           <ToDefine>qué calificaciones cuentan como «satisfecho» (aquí: Excelente + Bien)</ToDefine>
-          <ToDefine>si el cliente señala a otro empleado, ¿cuenta para el cajero en sesión o solo para el señalado?</ToDefine>
         </div>
       </Card>
       <Card title="Quejas recibidas" className="mt-4">
@@ -275,7 +274,7 @@ function CustomersSection({ branch, range, employeeId }: { branch: BranchFilter;
                 <th className={th}>Fecha</th>
                 <th className={th}>Sucursal</th>
                 <th className={th}>Calificación</th>
-                <th className={th}>Empleado</th>
+                <th className={th}>Cajero en sesión</th>
                 <th className={th}>¿Qué sucedió?</th>
               </tr>
             </thead>
@@ -285,7 +284,7 @@ function CustomersSection({ branch, range, employeeId }: { branch: BranchFilter;
                   <td className={`${td} whitespace-nowrap`}>{formatDateTime(f.createdAt)}</td>
                   <td className={td}>{branchName(db, f.branchId)}</td>
                   <td className={td}><RatingBadge rating={f.rating} /></td>
-                  <td className={td}>{f.complaint?.employeeId ? userName(db, f.complaint.employeeId) : '—'}</td>
+                  <td className={td}>{f.cashierId ? userName(db, f.cashierId) : '—'}</td>
                   <td className={td}>{f.complaint?.whatHappened ?? '—'}</td>
                 </tr>
               ))}
