@@ -20,6 +20,12 @@ describe('cashier sessions', () => {
     }
   });
 
+  it('sends every praise to the cashier in session', () => {
+    const praised = db.customerFeedback.filter((f) => f.praisedEmployeeIds.length > 0);
+    expect(praised.length).toBeGreaterThan(0);
+    for (const f of praised) expect(f.praisedEmployeeIds).toEqual([f.cashierId]);
+  });
+
   it('has at least 2 registers per branch, each with its tablet, and one with two cashiers', () => {
     for (const b of db.branches) {
       expect(db.tablets.filter((t) => t.branchId === b.id && t.status === 'authorized').length).toBeGreaterThanOrEqual(2);

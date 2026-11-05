@@ -8,6 +8,7 @@ import { nowIso } from '../../lib/dates';
 import { branchName, RATINGS } from '../../lib/lookup';
 import type { Rating, Tablet } from '../../mock/types';
 import { useDb, useDemoStore } from '../../store/useDemoStore';
+import { currentSession } from '../../lib/cashier';
 import { CashierCorner, CashierPicker, startCashierSession } from './CashierSession';
 import { ConnectionStatus, OfflineToggle } from './Offline';
 import { saveFeedback } from './saveFeedback';
@@ -195,7 +196,6 @@ export function CustomerFormPage() {
   const openEmailId = useDemoStore((s) => s.openEmailId);
   const [step, setStep] = useState<Step>('rating');
   const [rating, setRating] = useState<Rating | null>(null);
-  const [praised, setPraised] = useState<string[]>([]);
   const [comment, setComment] = useState('');
   const [whatHappened, setWhatHappened] = useState('');
   const [phone, setPhone] = useState('');
@@ -206,7 +206,6 @@ export function CustomerFormPage() {
   const restart = () => {
     setStep('rating');
     setRating(null);
-    setPraised([]);
     setComment('');
     setWhatHappened('');
     setPhone('');
@@ -228,10 +227,7 @@ export function CustomerFormPage() {
   if (!tablet) return <NotAuthorized />;
   const branch = db.branches.find((b) => b.id === tablet.branchId)!;
   const corner = <CashierCorner tablet={tablet} />;
-  // Sales and cashier staff of the branch (administrative staff does not attend customers).
-  const staff = db.users.filter(
-    (u) => u.role === 'employee' && u.active && u.branchId === tablet.branchId && (u.position === 'Ventas' || u.position === 'Caja'),
-  );
+  const cashier = db.users.find((u) => u.id === currentSession(db, tablet.id)?.employeeId);
 
   const finish = (r: Rating, extra: Parameters<typeof saveFeedback>[1] = { rating: r }) => {
     const result = saveFeedback(tablet, { ...extra, rating: r });
@@ -273,43 +269,31 @@ export function CustomerFormPage() {
   }
 
   if (step === 'excellent') {
+    const send = (praiseCashier: boolean) => finish('excelente', { rating: 'excelente', praiseCashier, comment });
     return (
       <TabletShell branch={branch.name} corner={corner}>
-        <div className="w-full max-w-3xl">
-          <h1 className="text-center text-2xl font-semibold text-slate-900 sm:text-3xl">¡Qué gusto! ¿Quieres felicitar a quien te atendió?</h1>
-          <p className="mt-2 text-center text-lg text-slate-500">Puedes elegir a una o varias personas. Es opcional.</p>
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {staff.map((s) => {
-              const on = praised.includes(s.id);
-              return (
-                <button
-                  key={s.id}
-                  type="button"
-                  aria-pressed={on}
-                  onClick={() => setPraised((p) => (on ? p.filter((x) => x !== s.id) : [...p, s.id]))}
-                  className={`rounded-2xl border-2 px-4 py-4 text-lg font-medium transition ${
-                    on ? 'border-accent-600 bg-accent-50 text-accent-800' : 'border-slate-200 text-slate-700 hover:border-slate-300'
-                  }`}
-                >
-                  {on && '✓ '}
-                  {s.name}
-                  <div className="text-sm font-normal text-slate-500">{s.position}</div>
-                </button>
-              );
-            })}
-          </div>
-          <label className="mt-6 block">
+        <div className="w-full max-w-2xl">
+          <h1 className="text-center text-2xl font-semibold text-slate-900 sm:text-3xl">
+            {cashier ? '¡Qué gusto! ¿Quieres felicitar a quien te atendió?' : '¡Qué gusto!'}
+          </h1>
+          <label className="mt-8 block">
             <span className="text-lg font-medium text-slate-700">¿Quieres dejarnos un comentario? (opcional)</span>
-            <textarea className={`${inputClass} mt-2 text-lg`} rows={3} value={comment} onChange={(e) => setComment(e.target.value)} />
+            <textarea className={`${inputClass} mt-2 text-lg`} rows={2} value={comment} onChange={(e) => setComment(e.target.value)} />
           </label>
-          <div className="mt-6 grid gap-3 sm:grid-cols-2">
-            <Button size="xl" variant="secondary" onClick={() => finish('excelente')}>
-              Terminar sin agregar nada
-            </Button>
-            <Button size="xl" onClick={() => finish('excelente', { rating: 'excelente', praisedEmployeeIds: praised, comment })}>
+          {cashier ? (
+            <div className="mt-6 grid grid-cols-2 gap-3">
+              <Button size="xl" variant="secondary" onClick={() => send(false)}>
+                No, gracias
+              </Button>
+              <Button size="xl" onClick={() => send(true)}>
+                Sí
+              </Button>
+            </div>
+          ) : (
+            <Button size="xl" className="mt-6 w-full" onClick={() => send(false)}>
               Enviar
             </Button>
-          </div>
+          )}
           <BackLink onClick={restart} />
         </div>
       </TabletShell>
