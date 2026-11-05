@@ -16,6 +16,7 @@ import type { EmailMessage, MockDb } from '../mock/types';
 import { useDb, useDemoStore } from '../store/useDemoStore';
 import { GroupedBars, RatingBars } from './charts';
 import { RatingBadge } from './RatingBadge';
+import { cashierSummary } from '../lib/cashier';
 import { GradeBadge, Modal, Note, ToDefine } from './ui';
 
 export const EMAIL_KIND_LABEL: Record<EmailMessage['kind'], string> = {
@@ -134,6 +135,26 @@ export function emailContent(db: MockDb, email: Pick<EmailMessage, 'kind' | 'ref
                 </div>
               ))}
             </div>
+          </Section>
+          <Section title="Clientes satisfechos por cajero en sesión">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-slate-500">
+                  <th className="py-1 font-medium">Cajero</th>
+                  <th className="py-1 text-right font-medium">Calificaciones</th>
+                  <th className="py-1 text-right font-medium">Excelente + Bien</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cashierSummary(db, all).map((c) => (
+                  <tr key={c.cashierId} className="border-t border-slate-100">
+                    <td className="py-1.5">{c.name}</td>
+                    <td className="py-1.5 text-right tabular-nums">{c.total}</td>
+                    <td className="py-1.5 text-right font-medium tabular-nums">{c.satisfiedPct}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </Section>
           <Section title="Felicitaciones por empleado">
             {praises.length ? (

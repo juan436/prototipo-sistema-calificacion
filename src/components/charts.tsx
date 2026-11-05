@@ -154,6 +154,24 @@ export function GroupedBars({
   );
 }
 
+/** One horizontal stacked bar per person, split by rating with the rating colors. */
+export function RatingStackBars({ data }: { data: Record<string, string | number>[] }) {
+  return (
+    <ResponsiveContainer width="100%" height={Math.max(140, data.length * 40 + 40)}>
+      <BarChart data={data} layout="vertical" margin={{ top: 0, right: 16, left: 8, bottom: 0 }}>
+        <CartesianGrid horizontal={false} stroke="#e2e8f0" />
+        <XAxis type="number" allowDecimals={false} tick={axis} tickLine={false} axisLine={false} />
+        <YAxis type="category" dataKey="name" width={118} tick={{ ...axis, fontSize: 11 }} tickLine={false} axisLine={false} />
+        <Tooltip />
+        <Legend wrapperStyle={{ fontSize: 12 }} />
+        {RATINGS.map((r) => (
+          <Bar key={r.id} dataKey={r.id} name={r.label} stackId="a" fill={r.color} isAnimationActive={false} />
+        ))}
+      </BarChart>
+    </ResponsiveContainer>
+  );
+}
+
 export function HorizontalBars({ data, color = '#2f7f82', valueLabel }: { data: { name: string; value: number }[]; color?: string; valueLabel: string }) {
   return (
     <ResponsiveContainer width="100%" height={Math.max(120, data.length * 34)}>
