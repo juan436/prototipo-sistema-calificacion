@@ -5,12 +5,12 @@ import type { BranchId, FormDefinition, MockDb, Rating, User } from '../mock/typ
  * `color` is the solid color (tablet buttons, charts); `text` is the readable text color on top of it;
  * `soft` and `ink` are the tinted background and text used in badges.
  */
-export const RATINGS: { id: Rating; label: string; emoji: string; color: string; text: string; soft: string; ink: string }[] = [
-  { id: 'excelente', label: 'Excelente', emoji: '😄', color: '#15803d', text: '#ffffff', soft: '#dcfce7', ink: '#14532d' },
-  { id: 'bien', label: 'Bien', emoji: '🙂', color: '#86d97b', text: '#14361a', soft: '#ecfccb', ink: '#3f6212' },
-  { id: 'regular', label: 'Regular', emoji: '😐', color: '#facc15', text: '#422006', soft: '#fef9c3', ink: '#713f12' },
-  { id: 'mal', label: 'Mal', emoji: '🙁', color: '#f97316', text: '#ffffff', soft: '#ffedd5', ink: '#9a3412' },
-  { id: 'muy_mal', label: 'Muy mal', emoji: '😞', color: '#dc2626', text: '#ffffff', soft: '#fee2e2', ink: '#991b1b' },
+export const RATINGS: { id: Rating; label: string; color: string; text: string; soft: string; ink: string }[] = [
+  { id: 'excelente', label: 'Excelente', color: '#15803d', text: '#ffffff', soft: '#dcfce7', ink: '#14532d' },
+  { id: 'bien', label: 'Bien', color: '#86d97b', text: '#14361a', soft: '#ecfccb', ink: '#3f6212' },
+  { id: 'regular', label: 'Regular', color: '#facc15', text: '#422006', soft: '#fef9c3', ink: '#713f12' },
+  { id: 'mal', label: 'Mal', color: '#f97316', text: '#ffffff', soft: '#ffedd5', ink: '#9a3412' },
+  { id: 'muy_mal', label: 'Muy mal', color: '#dc2626', text: '#ffffff', soft: '#fee2e2', ink: '#991b1b' },
 ];
 
 export function ratingInfo(rating: Rating) {
