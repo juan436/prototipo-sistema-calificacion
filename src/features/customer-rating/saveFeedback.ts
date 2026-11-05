@@ -13,7 +13,6 @@ export interface FeedbackInput {
 function clean(complaint?: Complaint): Complaint | undefined {
   if (!complaint) return undefined;
   const c: Complaint = {};
-  if (complaint.employeeId) c.employeeId = complaint.employeeId;
   if (complaint.whatHappened?.trim()) c.whatHappened = complaint.whatHappened.trim();
   if (complaint.phone?.trim()) c.phone = complaint.phone.trim();
   return Object.keys(c).length ? c : undefined;

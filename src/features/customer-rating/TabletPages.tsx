@@ -197,7 +197,6 @@ export function CustomerFormPage() {
   const [rating, setRating] = useState<Rating | null>(null);
   const [praised, setPraised] = useState<string[]>([]);
   const [comment, setComment] = useState('');
-  const [attendedBy, setAttendedBy] = useState('');
   const [whatHappened, setWhatHappened] = useState('');
   const [phone, setPhone] = useState('');
   const [alertId, setAlertId] = useState<string | null>(null);
@@ -209,7 +208,6 @@ export function CustomerFormPage() {
     setRating(null);
     setPraised([]);
     setComment('');
-    setAttendedBy('');
     setWhatHappened('');
     setPhone('');
     setAlertId(null);
@@ -326,28 +324,7 @@ export function CustomerFormPage() {
           <p className="mt-2 text-center text-lg text-slate-500">
             Si quieres, cuéntanos qué pasó. <strong>Ningún dato es obligatorio</strong> y puedes enviar sin dar datos personales.
           </p>
-          <div className="mt-6">
-            <div className="text-lg font-medium text-slate-700">¿Quién te atendió?</div>
-            <div className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {[...staff.map((s) => ({ id: s.id, name: s.name })), { id: '', name: 'No sé / prefiero no decir' }].map((s) => {
-                const on = attendedBy === s.id;
-                return (
-                  <button
-                    key={s.id || 'none'}
-                    type="button"
-                    aria-pressed={on}
-                    onClick={() => setAttendedBy(s.id)}
-                    className={`rounded-2xl border-2 px-4 py-3 text-lg transition ${
-                      on ? 'border-accent-600 bg-accent-50 text-accent-800' : 'border-slate-200 text-slate-700 hover:border-slate-300'
-                    }`}
-                  >
-                    {s.name}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-          <label className="mt-5 block">
+          <label className="mt-6 block">
             <span className="text-lg font-medium text-slate-700">¿Qué sucedió?</span>
             <textarea className={`${inputClass} mt-2 text-lg`} rows={3} value={whatHappened} onChange={(e) => setWhatHappened(e.target.value)} />
           </label>
@@ -366,7 +343,7 @@ export function CustomerFormPage() {
             <Button size="xl" variant="secondary" onClick={() => finish(rating!)}>
               Terminar sin enviar datos
             </Button>
-            <Button size="xl" onClick={() => finish(rating!, { rating: rating!, complaint: { employeeId: attendedBy, whatHappened, phone } })}>
+            <Button size="xl" onClick={() => finish(rating!, { rating: rating!, complaint: { whatHappened, phone } })}>
               Enviar
             </Button>
           </div>

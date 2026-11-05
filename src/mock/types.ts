@@ -31,8 +31,11 @@ export interface User {
 
 export type Rating = 'excelente' | 'bien' | 'regular' | 'mal' | 'muy_mal';
 
+/**
+ * Optional complaint form. It does not ask who attended the customer: the rating is already
+ * linked to the cashier in session on that tablet.
+ */
 export interface Complaint {
-  employeeId?: string;
   whatHappened?: string;
   phone?: string;
 }

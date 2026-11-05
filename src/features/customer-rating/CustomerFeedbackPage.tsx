@@ -69,8 +69,7 @@ export function CustomerFeedbackPage() {
           </label>
         </div>
         <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-slate-500">
-          {list.length} registros ·
-          <ToDefine>si el cliente señala a otro empleado, ¿la calificación cuenta para el bono del cajero en sesión o solo para el señalado?</ToDefine>
+          {list.length} registros · cada calificación y cada queja cuentan para el cajero en sesión en esa caja
         </div>
         <Table>
           <thead>
@@ -103,7 +102,6 @@ export function CustomerFeedbackPage() {
                     {f.praisedEmployeeIds.length > 0 && (
                       <div className="text-emerald-700">Felicitó a {f.praisedEmployeeIds.map((id) => userName(db, id)).join(', ')}</div>
                     )}
-                    {f.complaint?.employeeId && <div className="text-red-700">Señaló a {userName(db, f.complaint.employeeId)}</div>}
                   </td>
                   <td className={`${td} max-w-xs`}>
                     {f.complaint ? (

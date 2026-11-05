@@ -58,7 +58,7 @@ describe('demo data', () => {
 
   it('has the employee with annexes and the transferred employee', () => {
     expect(db.customerFeedback.some((f) => f.praisedEmployeeIds.includes(ANNEX_EMPLOYEE_ID))).toBe(true);
-    expect(db.customerFeedback.some((f) => f.complaint?.employeeId === ANNEX_EMPLOYEE_ID)).toBe(true);
+    expect(db.customerFeedback.some((f) => !!f.complaint && f.cashierId === ANNEX_EMPLOYEE_ID)).toBe(true);
     const report = db.disciplinaryReports.find((r) => r.employeeId === ANNEX_EMPLOYEE_ID)!;
     expect(db.acts.some((a) => a.reportId === report.id)).toBe(true);
     const moved = db.users.find((u) => u.id === TRANSFERRED_EMPLOYEE_ID)!;

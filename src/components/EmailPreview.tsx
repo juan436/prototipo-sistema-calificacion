@@ -74,7 +74,6 @@ export function emailContent(db: MockDb, email: Pick<EmailMessage, 'kind' | 'ref
             <Row label="Fecha">{formatDate(f.createdAt)}</Row>
             <Row label="Hora">{formatTime(f.createdAt)}</Row>
             <Row label="Calificación"><RatingBadge rating={f.rating} /></Row>
-            <Row label="Empleado señalado">{f.complaint?.employeeId ? userName(db, f.complaint.employeeId) : 'No lo indicó'}</Row>
             <Row label="Comentario">{f.complaint?.whatHappened || f.comment || 'Sin comentario'}</Row>
             {f.complaint?.phone && <Row label="Teléfono de contacto">{f.complaint.phone}</Row>}
           </Section>
@@ -176,7 +175,7 @@ export function emailContent(db: MockDb, email: Pick<EmailMessage, 'kind' | 'ref
               {complaints.map((f) => (
                 <li key={f.id} className="rounded-lg bg-red-50 px-3 py-2 text-red-900">
                   <strong>Queja</strong> · {branchName(db, f.branchId)} · {formatDateTime(f.createdAt)} · {ratingLabel(f.rating)}
-                  {f.complaint?.employeeId && <> · {userName(db, f.complaint.employeeId)}</>}
+                  {f.cashierId && <> · {userName(db, f.cashierId)}</>}
                   <div>{f.complaint?.whatHappened || 'Sin descripción'}</div>
                 </li>
               ))}
