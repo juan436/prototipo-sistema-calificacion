@@ -8,17 +8,20 @@ import { nowIso } from '../../lib/dates';
 import { branchName, RATINGS } from '../../lib/lookup';
 import type { Rating, Tablet } from '../../mock/types';
 import { useDb, useDemoStore } from '../../store/useDemoStore';
+import { CashierCorner, CashierPicker, startCashierSession } from './CashierSession';
+import { ConnectionStatus, OfflineToggle } from './Offline';
 import { saveFeedback } from './saveFeedback';
 
 const RESET_SECONDS = 8;
 
-function TabletShell({ children, branch }: { children: ReactNode; branch?: string }) {
+function TabletShell({ children, branch, corner }: { children: ReactNode; branch?: string; corner?: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-white">
       <DemoBanner />
       <header className="flex items-center gap-3 px-4 py-3 sm:px-6 sm:py-4">
         <LogoPlaceholder size="lg" />
         {branch && <div className="text-xl font-semibold text-slate-700">{branch}</div>}
+        {corner}
       </header>
       <main className="flex flex-1 flex-col items-center justify-center px-4 pb-8 sm:px-6 sm:pb-10">{children}</main>
       <footer className="px-6 pb-4 text-center text-xs text-slate-400">
@@ -29,7 +32,14 @@ function TabletShell({ children, branch }: { children: ReactNode; branch?: strin
         <Link to="/" className="hover:underline">
           Salir de la vista de tableta (solo en la demo)
         </Link>
+        {corner && (
+          <>
+            <span className="mx-2">·</span>
+            <OfflineToggle />
+          </>
+        )}
       </footer>
+      {corner && <ConnectionStatus />}
     </div>
   );
 }
@@ -73,7 +83,9 @@ export function ActivationPage() {
   const navigate = useNavigate();
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
+  const [activatedId, setActivatedId] = useState<string | null>(null);
   const available = db.activationCodes.filter((c) => !c.usedAt);
+  const activated = db.tablets.find((t) => t.id === activatedId);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
@@ -82,11 +94,12 @@ export function ActivationPage() {
     if (!found) return setError('Ese código no existe. Revísalo o pide uno nuevo al administrador.');
     if (found.usedAt) return setError('Ese código ya se usó. Cada código sirve una sola vez.');
     const tabletId = `t-${Date.now().toString(36)}`;
-    const count = db.tablets.filter((t) => t.branchId === found.branchId).length + 1;
     update((d) => {
       d.tablets.push({
         id: tabletId,
-        name: `Tableta ${count} · ${branchName(d, found.branchId).replace('Ferretería ', '')}`,
+        name: `${found.register} · ${branchName(d, found.branchId).replace('Ferretería ', '')}`,
+        register: found.register,
+        pin: found.pin,
         branchId: found.branchId,
         status: 'authorized',
         createdAt: nowIso(),
@@ -96,8 +109,34 @@ export function ActivationPage() {
       c.tabletId = tabletId;
     });
     setDeviceTablet(tabletId);
-    navigate('/tableta/calificar', { replace: true });
+    setActivatedId(tabletId);
   };
+
+  if (activated) {
+    return (
+      <TabletShell branch={branchName(db, activated.branchId)}>
+        <div className="w-full max-w-md">
+          <h1 className="text-center text-2xl font-semibold text-slate-900 sm:text-3xl">¿Quién está en {activated.register}?</h1>
+          <p className="mb-6 mt-2 text-center text-slate-500">
+            Las calificaciones de esta caja quedan a nombre del cajero en sesión hasta que alguien lo cambie.
+          </p>
+          <CashierPicker
+            tablet={activated}
+            confirmLabel="Empezar"
+            onConfirm={(id) => {
+              startCashierSession(activated.id, id);
+              navigate('/tableta/calificar', { replace: true });
+            }}
+          />
+          <div className="mt-3 text-center">
+            <button type="button" className="text-sm text-slate-500 hover:underline" onClick={() => navigate('/tableta/calificar', { replace: true })}>
+              Elegir después
+            </button>
+          </div>
+        </div>
+      </TabletShell>
+    );
+  }
 
   return (
     <TabletShell>
@@ -135,7 +174,7 @@ export function ActivationPage() {
                   {c.code}
                 </button>
               ))}
-              ({available.map((c) => branchName(db, c.branchId)).join(', ')}). También funciona cualquier código que generes
+              ({available.map((c) => `${c.register} de ${branchName(db, c.branchId)}`).join(', ')}). También funciona cualquier código que generes
               en el panel, en Tabletas.
             </>
           ) : (
@@ -162,6 +201,7 @@ export function CustomerFormPage() {
   const [whatHappened, setWhatHappened] = useState('');
   const [phone, setPhone] = useState('');
   const [alertId, setAlertId] = useState<string | null>(null);
+  const [pendingSend, setPendingSend] = useState(false);
   const [seconds, setSeconds] = useState(RESET_SECONDS);
 
   const restart = () => {
@@ -173,6 +213,7 @@ export function CustomerFormPage() {
     setWhatHappened('');
     setPhone('');
     setAlertId(null);
+    setPendingSend(false);
     setSeconds(RESET_SECONDS);
   };
 
@@ -188,10 +229,16 @@ export function CustomerFormPage() {
 
   if (!tablet) return <NotAuthorized />;
   const branch = db.branches.find((b) => b.id === tablet.branchId)!;
-  const staff = db.users.filter((u) => u.role === 'employee' && u.active && u.branchId === tablet.branchId);
+  const corner = <CashierCorner tablet={tablet} />;
+  // Sales and cashier staff of the branch (administrative staff does not attend customers).
+  const staff = db.users.filter(
+    (u) => u.role === 'employee' && u.active && u.branchId === tablet.branchId && (u.position === 'Ventas' || u.position === 'Caja'),
+  );
 
   const finish = (r: Rating, extra: Parameters<typeof saveFeedback>[1] = { rating: r }) => {
-    setAlertId(saveFeedback(tablet, { ...extra, rating: r }));
+    const result = saveFeedback(tablet, { ...extra, rating: r });
+    setAlertId(result.alertId);
+    setPendingSend(result.pending);
     setSeconds(RESET_SECONDS);
     setStep('thanks');
   };
@@ -205,7 +252,7 @@ export function CustomerFormPage() {
 
   if (step === 'rating') {
     return (
-      <TabletShell branch={branch.name}>
+      <TabletShell branch={branch.name} corner={corner}>
         <h1 className="text-center text-2xl font-semibold text-slate-900 sm:text-4xl">¿Cómo fue tu experiencia en {branch.questionName}?</h1>
         <div className="mt-6 grid w-full max-w-5xl sm:mt-10 grid-cols-1 gap-4 landscape:grid-cols-5">
           {RATINGS.map((r) => (
@@ -213,12 +260,13 @@ export function CustomerFormPage() {
               key={r.id}
               type="button"
               onClick={() => choose(r.id)}
-              className="flex items-center gap-5 rounded-3xl border-2 border-slate-200 bg-white px-6 py-5 text-left transition hover:border-accent-500 hover:bg-accent-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent-200 landscape:flex-col landscape:py-5 landscape:text-center lg:landscape:py-8"
+              style={{ background: r.color, color: r.text }}
+              className="flex items-center gap-5 rounded-3xl px-6 py-5 text-left shadow-sm transition hover:brightness-95 active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-400 focus-visible:ring-offset-2 landscape:flex-col landscape:py-5 landscape:text-center lg:landscape:py-8"
             >
               <span className="text-4xl sm:text-5xl lg:landscape:text-6xl" aria-hidden>
                 {r.emoji}
               </span>
-              <span className="text-2xl font-semibold text-slate-800">{r.label}</span>
+              <span className="text-2xl font-semibold">{r.label}</span>
             </button>
           ))}
         </div>
@@ -228,7 +276,7 @@ export function CustomerFormPage() {
 
   if (step === 'excellent') {
     return (
-      <TabletShell branch={branch.name}>
+      <TabletShell branch={branch.name} corner={corner}>
         <div className="w-full max-w-3xl">
           <h1 className="text-center text-2xl font-semibold text-slate-900 sm:text-3xl">¡Qué gusto! ¿Quieres felicitar a quien te atendió?</h1>
           <p className="mt-2 text-center text-lg text-slate-500">Puedes elegir a una o varias personas. Es opcional.</p>
@@ -272,7 +320,7 @@ export function CustomerFormPage() {
 
   if (step === 'complaint') {
     return (
-      <TabletShell branch={branch.name}>
+      <TabletShell branch={branch.name} corner={corner}>
         <div className="w-full max-w-3xl">
           <h1 className="text-center text-2xl font-semibold text-slate-900 sm:text-3xl">Lamentamos que tu experiencia no fuera buena</h1>
           <p className="mt-2 text-center text-lg text-slate-500">
@@ -329,7 +377,7 @@ export function CustomerFormPage() {
   }
 
   return (
-    <TabletShell branch={branch.name}>
+    <TabletShell branch={branch.name} corner={corner}>
       <CheckCircle2 className="h-20 w-20 text-accent-600" />
       <h1 className="mt-4 text-center text-3xl font-semibold text-slate-900 sm:text-4xl">¡Gracias por tu opinión!</h1>
       <p className="mt-3 text-center text-xl text-slate-500">Nos ayuda a atenderte mejor.</p>
@@ -337,6 +385,12 @@ export function CustomerFormPage() {
       <Button variant="ghost" className="mt-2" onClick={restart}>
         Volver al inicio ahora
       </Button>
+      {pendingSend && (
+        <Note tone="warning" className="mt-8 max-w-lg">
+          <strong>Solo para la demo:</strong> no hay conexión. La calificación quedó en espera con su fecha y hora, y se envía sola en
+          cuanto vuelva el internet. El cliente no tiene que hacer nada.
+        </Note>
+      )}
       {alertId && (
         <Note tone="warning" className="mt-8 max-w-lg">
           <strong>Solo para la demo:</strong> esta respuesta generó una alerta inmediata por correo al administrador.{' '}

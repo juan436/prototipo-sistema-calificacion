@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
 import { FileDown, FileSpreadsheet } from 'lucide-react';
-import { GradeLines, GroupedBars, HorizontalBars, RatingEvolution, RatingPie } from '../../components/charts';
+import { GradeLines, GroupedBars, HorizontalBars, RatingBars, RatingEvolution, RatingPie, RatingStackBars } from '../../components/charts';
 import { BranchSelect, DateInput } from '../../components/filters';
-import { Card, ExampleTag, GradeBadge, Note, PageHeader, StatCard, Table, td, th, Button, Select } from '../../components/ui';
+import { RatingBadge } from '../../components/RatingBadge';
+import { cashierSummary, satisfiedPct } from '../../lib/cashier';
+import { Card, ExampleTag, GradeBadge, Note, PageHeader, StatCard, Table, td, th, Button, Select, ToDefine } from '../../components/ui';
 import { formatDateTime, formatMonthTitle, lastDayOfMonth, monthRange } from '../../lib/dates';
-import { BRANCH_COLORS, branchName, ratingLabel, userName } from '../../lib/lookup';
+import { BRANCH_COLORS, branchName, userName } from '../../lib/lookup';
 import { average, averageAreas, computeScore } from '../../lib/scoring';
 import { getVersion } from '../../lib/forms';
 import {
@@ -156,15 +158,23 @@ function CustomersSection({ branch, range, employeeId }: { branch: BranchFilter;
   const praises = praisesByEmployee(db, list).filter((p) => !employeeId || p.employeeId === employeeId);
   const complaints = complaintsOf(list).filter((f) => !employeeId || f.complaint?.employeeId === employeeId);
   const months = rangeMonths(range).filter((m) => db.customerFeedback.some((f) => f.createdAt.startsWith(m)));
-  const byBranch = db.branches.map((b) => ({ b, list: filterFeedback(db, { branch: b.id, range }) }));
+  const byBranch = db.branches
+    .filter((b) => branch === 'all' || b.id === branch)
+    .map((b) => ({ b, list: filterFeedback(db, { branch: b.id, range, employeeId: employeeId || undefined }) }));
+  const cashiers = cashierSummary(db, list).filter((c) => !employeeId || c.cashierId === employeeId);
 
   return (
     <section>
       <SectionTitle>Satisfacción de clientes</SectionTitle>
-      {employeeId && <Note className="mb-4">Se muestran las evaluaciones donde el cliente felicitó o señaló a {userName(db, employeeId)}.</Note>}
+      {employeeId && (
+        <Note className="mb-4">
+          Se muestran las evaluaciones donde {userName(db, employeeId)} era el cajero en sesión, o donde el cliente lo felicitó o lo
+          señaló.
+        </Note>
+      )}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total de evaluaciones" value={list.length} />
-        <StatCard label="Excelente" value={`${dist[0].pct}%`} hint={`${dist[0].count} evaluaciones`} />
+        <StatCard label="Satisfechos (Excelente + Bien)" value={`${satisfiedPct(list)}%`} hint={`${dist[0].count + dist[1].count} de ${list.length}`} />
         <StatCard label="Felicitaciones" value={praises.reduce((s, p) => s + p.count, 0)} />
         <StatCard label="Quejas recibidas" value={complaints.length} />
       </div>
@@ -196,17 +206,65 @@ function CustomersSection({ branch, range, employeeId }: { branch: BranchFilter;
             <p className="text-sm text-slate-500">Sin felicitaciones en el periodo.</p>
           )}
         </Card>
-        <Card title="Comparación entre sucursales">
-          <GroupedBars
-            data={dist.map((d) => ({
-              label: d.label,
-              ...Object.fromEntries(byBranch.map(({ b, list: bl }) => [b.id, ratingDistribution(bl).find((x) => x.rating === d.rating)!.pct])),
-            }))}
-            xKey="label"
-            series={db.branches.map((b) => ({ key: b.id, label: `${b.name} (%)`, color: BRANCH_COLORS[b.id] }))}
-          />
-        </Card>
       </div>
+
+      <Card title="Cuántos clientes se van satisfechos, por sucursal" className="mt-4">
+        <div className={`grid gap-6 ${byBranch.length > 1 ? 'lg:grid-cols-2' : ''}`}>
+          {byBranch.map(({ b, list: bl }) => (
+            <div key={b.id} className="min-w-0">
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className="font-medium text-slate-800">{b.name}</h3>
+                <span className="text-sm text-slate-500">
+                  {bl.length} calificaciones · <strong className="text-slate-800">{satisfiedPct(bl)}%</strong> Excelente + Bien
+                </span>
+              </div>
+              <RatingBars data={ratingDistribution(bl)} />
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card title="Por cajero en sesión" className="mt-4">
+        <p className="mb-3 text-sm text-slate-500">
+          Cada calificación cuenta para el cajero que estaba en sesión en esa caja. Sirve para comparar turnos y para los bonos.
+        </p>
+        {cashiers.length === 0 ? (
+          <p className="text-sm text-slate-500">Sin calificaciones con cajero en sesión en el periodo.</p>
+        ) : (
+          <div className="grid gap-6 xl:grid-cols-2">
+            <RatingStackBars data={cashiers.map((c) => ({ name: c.name, ...c.counts }))} />
+            <Table>
+              <thead>
+                <tr>
+                  <th className={th}>Cajero</th>
+                  <th className={`${th} text-right`}>Calificaciones</th>
+                  <th className={`${th} text-right`}>Excelente</th>
+                  <th className={`${th} text-right`}>Bien</th>
+                  <th className={`${th} text-right`}>Excelente + Bien</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cashiers.map((c) => (
+                  <tr key={c.cashierId}>
+                    <td className={td}>
+                      <div className="font-medium">{c.name}</div>
+                      <div className="text-xs text-slate-500">{branchName(db, db.users.find((u) => u.id === c.cashierId)?.branchId)}</div>
+                    </td>
+                    <td className={`${td} text-right tabular-nums`}>{c.total}</td>
+                    <td className={`${td} text-right tabular-nums`}>{c.counts.excelente}</td>
+                    <td className={`${td} text-right tabular-nums`}>{c.counts.bien}</td>
+                    <td className={`${td} text-right font-semibold tabular-nums`}>{c.satisfiedPct}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </div>
+        )}
+        <div className="mt-4 flex flex-wrap gap-2">
+          <ToDefine>qué calificaciones cuentan como «satisfecho» (aquí: Excelente + Bien)</ToDefine>
+          <ToDefine>si el cliente señala a otro empleado, ¿cuenta para el cajero en sesión o solo para el señalado?</ToDefine>
+        </div>
+      </Card>
       <Card title="Quejas recibidas" className="mt-4">
         {complaints.length === 0 ? (
           <p className="text-sm text-slate-500">Sin quejas en el periodo.</p>
@@ -226,7 +284,7 @@ function CustomersSection({ branch, range, employeeId }: { branch: BranchFilter;
                 <tr key={f.id}>
                   <td className={`${td} whitespace-nowrap`}>{formatDateTime(f.createdAt)}</td>
                   <td className={td}>{branchName(db, f.branchId)}</td>
-                  <td className={td}>{ratingLabel(f.rating)}</td>
+                  <td className={td}><RatingBadge rating={f.rating} /></td>
                   <td className={td}>{f.complaint?.employeeId ? userName(db, f.complaint.employeeId) : '—'}</td>
                   <td className={td}>{f.complaint?.whatHappened ?? '—'}</td>
                 </tr>
@@ -398,6 +456,10 @@ function exportCsv(db: MockDb, branch: BranchFilter, range: Required<DateRange>,
     ['Satisfacción de clientes'],
     ['Calificación', 'Cantidad', 'Porcentaje'],
     ...ratingDistribution(list).map((d) => [d.label, d.count, `${d.pct}%`]),
+    [],
+    ['Clientes por cajero en sesión'],
+    ['Cajero', 'Calificaciones', 'Excelente', 'Bien', 'Excelente + Bien'],
+    ...cashierSummary(db, list).map((c) => [c.name, c.total, c.counts.excelente, c.counts.bien, `${c.satisfiedPct}%`]),
     [],
     ['Desempeño de empleados'],
     ['Empleado', 'Periodo', 'Sucursal', 'Calificación'],

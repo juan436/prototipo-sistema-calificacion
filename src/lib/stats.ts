@@ -35,7 +35,12 @@ export function filterFeedback(
   return db.customerFeedback.filter((f) => {
     if (opts.branch && opts.branch !== 'all' && f.branchId !== opts.branch) return false;
     if (opts.range && !inRange(f.createdAt, opts.range)) return false;
-    if (opts.employeeId && !f.praisedEmployeeIds.includes(opts.employeeId) && f.complaint?.employeeId !== opts.employeeId) {
+    if (
+      opts.employeeId &&
+      f.cashierId !== opts.employeeId &&
+      !f.praisedEmployeeIds.includes(opts.employeeId) &&
+      f.complaint?.employeeId !== opts.employeeId
+    ) {
       return false;
     }
     return true;

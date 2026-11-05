@@ -52,7 +52,7 @@ export function createUsers(): User[] {
     { ...employee(MANAGER_FERREISLA_ID, 'Patricia Méndez', 'Gerencia', 'ferreisla'), role: 'manager' },
     { ...employee(MANAGER_LAGLORIA_ID, 'Jorge Salinas', 'Gerencia', 'lagloria'), role: 'manager' },
     employee('e01', 'Ana Torres', 'Ventas', 'ferreisla'),
-    employee('e02', 'Mariana López', 'Ventas', 'ferreisla'),
+    employee('e02', 'Mariana López', 'Caja', 'ferreisla'),
     employee('e03', 'Luis Ramírez', 'Caja', 'ferreisla'),
     employee('e04', 'Sofía Herrera', 'Ventas', 'ferreisla'),
     transferred,
@@ -63,7 +63,9 @@ export function createUsers(): User[] {
     employee('e10', 'Miguel Ángel Rosas', 'Caja', 'lagloria'),
     employee('e11', 'Gabriela Ponce', 'Ventas', 'lagloria'),
     employee('e12', 'Héctor Aguilar', 'Caja', 'lagloria'),
-    employee('e13', 'Paola Medina', 'Ventas', 'lagloria'),
+    employee('e13', 'Paola Medina', 'Caja', 'lagloria'),
     employee('e14', 'Andrés Salazar', 'Ventas', 'lagloria'),
+    employee('e15', 'Rocío Fuentes', 'Administrativo', 'ferreisla'),
+    employee('e16', 'Tomás Ibarra', 'Administrativo', 'lagloria'),
   ];
 }

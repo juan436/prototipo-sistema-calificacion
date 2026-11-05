@@ -15,6 +15,8 @@ import {
 import type { EmailMessage, MockDb } from '../mock/types';
 import { useDb, useDemoStore } from '../store/useDemoStore';
 import { GroupedBars, RatingBars } from './charts';
+import { RatingBadge } from './RatingBadge';
+import { cashierSummary } from '../lib/cashier';
 import { GradeBadge, Modal, Note, ToDefine } from './ui';
 
 export const EMAIL_KIND_LABEL: Record<EmailMessage['kind'], string> = {
@@ -67,9 +69,11 @@ export function emailContent(db: MockDb, email: Pick<EmailMessage, 'kind' | 'ref
           <Section title="Detalle">
             <Row label="Motivo">{f.rating === 'muy_mal' && f.complaint ? 'Calificación «Muy mal» con queja' : reason}</Row>
             <Row label="Sucursal">{branchName(db, f.branchId)}</Row>
+            <Row label="Caja">{db.tablets.find((t) => t.id === f.tabletId)?.register ?? '—'}</Row>
+            <Row label="Cajero en sesión">{f.cashierId ? userName(db, f.cashierId) : 'Sin cajero en sesión'}</Row>
             <Row label="Fecha">{formatDate(f.createdAt)}</Row>
             <Row label="Hora">{formatTime(f.createdAt)}</Row>
-            <Row label="Calificación">{ratingLabel(f.rating)}</Row>
+            <Row label="Calificación"><RatingBadge rating={f.rating} /></Row>
             <Row label="Empleado señalado">{f.complaint?.employeeId ? userName(db, f.complaint.employeeId) : 'No lo indicó'}</Row>
             <Row label="Comentario">{f.complaint?.whatHappened || f.comment || 'Sin comentario'}</Row>
             {f.complaint?.phone && <Row label="Teléfono de contacto">{f.complaint.phone}</Row>}
@@ -131,6 +135,26 @@ export function emailContent(db: MockDb, email: Pick<EmailMessage, 'kind' | 'ref
                 </div>
               ))}
             </div>
+          </Section>
+          <Section title="Clientes satisfechos por cajero en sesión">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-slate-500">
+                  <th className="py-1 font-medium">Cajero</th>
+                  <th className="py-1 text-right font-medium">Calificaciones</th>
+                  <th className="py-1 text-right font-medium">Excelente + Bien</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cashierSummary(db, all).map((c) => (
+                  <tr key={c.cashierId} className="border-t border-slate-100">
+                    <td className="py-1.5">{c.name}</td>
+                    <td className="py-1.5 text-right tabular-nums">{c.total}</td>
+                    <td className="py-1.5 text-right font-medium tabular-nums">{c.satisfiedPct}%</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </Section>
           <Section title="Felicitaciones por empleado">
             {praises.length ? (

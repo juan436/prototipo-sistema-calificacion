@@ -46,6 +46,16 @@ describe('demo data', () => {
     expect(db.performance.filter((e) => e.changes.length > 0)).toHaveLength(1);
   });
 
+  it('evaluates each employee with the questionnaire of their role', () => {
+    for (const e of db.performance) {
+      const employee = db.users.find((u) => u.id === e.employeeId)!;
+      const form = db.forms.find((f) => f.id === e.formId)!;
+      expect(form.position).toBe(employee.position);
+    }
+    const positions = new Set(db.users.filter((u) => u.role === 'employee').map((u) => u.position));
+    expect([...positions].sort()).toEqual(['Administrativo', 'Caja', 'Ventas']);
+  });
+
   it('has the employee with annexes and the transferred employee', () => {
     expect(db.customerFeedback.some((f) => f.praisedEmployeeIds.includes(ANNEX_EMPLOYEE_ID))).toBe(true);
     expect(db.customerFeedback.some((f) => f.complaint?.employeeId === ANNEX_EMPLOYEE_ID)).toBe(true);
@@ -55,8 +65,8 @@ describe('demo data', () => {
     expect(new Set(db.performance.filter((e) => e.employeeId === moved.id).map((e) => e.branchId)).size).toBe(2);
   });
 
-  it('has 2 authorized tablets and 1 revoked', () => {
-    expect(db.tablets.filter((t) => t.status === 'authorized')).toHaveLength(2);
+  it('has 2 authorized tablets per branch and 1 revoked', () => {
+    expect(db.tablets.filter((t) => t.status === 'authorized')).toHaveLength(4);
     expect(db.tablets.filter((t) => t.status === 'revoked')).toHaveLength(1);
   });
 });

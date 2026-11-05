@@ -1,5 +1,5 @@
 import { joinMonths, periodOf } from './dates';
-import type { FormDefinition, FormVersion, MockDb, Question } from '../mock/types';
+import type { FormDefinition, FormVersion, MockDb, Question, User } from '../mock/types';
 
 export function latestVersion(form: FormDefinition): FormVersion {
   return form.versions[form.versions.length - 1];
@@ -83,4 +83,9 @@ export function moveItem<T>(items: T[], index: number, delta: number): T[] {
   const [item] = copy.splice(index, 1);
   copy.splice(target, 0, item);
   return copy;
+}
+
+/** Performance questionnaire that applies to an employee, according to their role (position). */
+export function performanceFormFor(db: MockDb, employee: User): FormDefinition | undefined {
+  return db.forms.find((f) => f.type === 'performance' && f.position === employee.position);
 }
