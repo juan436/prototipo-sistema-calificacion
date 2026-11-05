@@ -19,8 +19,32 @@ function clean(complaint?: Complaint): Complaint | undefined {
   return Object.keys(c).length ? c : undefined;
 }
 
-/** Saves one customer submission. Returns the alert email id if an alert was generated. */
-export function saveFeedback(tablet: Tablet, input: FeedbackInput): string | null {
+/** How often a pending rating is sent again. Example value: the real interval is still to be defined. */
+export const RETRY_SECONDS = 10;
+
+export function isOnline(): boolean {
+  return navigator.onLine && !useDemoStore.getState().simulateOffline;
+}
+
+/** Stores the rating and sends the alert when needed. */
+function commit(record: CustomerFeedback): string | null {
+  const store = useDemoStore.getState();
+  store.update((db) => {
+    db.customerFeedback.push(record);
+  });
+  if (record.rating === 'muy_mal' || record.complaint) return store.queueEmail('customer_alert', record.id);
+  return null;
+}
+
+export interface SaveResult {
+  /** Alert email generated right away (only when online). */
+  alertId: string | null;
+  /** True when there was no connection and the rating is waiting to be sent. */
+  pending: boolean;
+}
+
+/** Saves one customer submission. Without connection it waits and is retried later. */
+export function saveFeedback(tablet: Tablet, input: FeedbackInput): SaveResult {
   const store = useDemoStore.getState();
   const record: CustomerFeedback = {
     id: `cf-${Date.now().toString(36)}`,
@@ -36,12 +60,18 @@ export function saveFeedback(tablet: Tablet, input: FeedbackInput): string | nul
   const complaint = input.rating === 'mal' || input.rating === 'muy_mal' ? clean(input.complaint) : undefined;
   if (complaint) record.complaint = complaint;
 
-  store.update((db) => {
-    db.customerFeedback.push(record);
-  });
-
-  if (record.rating === 'muy_mal' || record.complaint) {
-    return store.queueEmail('customer_alert', record.id);
+  if (!isOnline()) {
+    useDemoStore.setState((s) => ({ pendingFeedback: [...s.pendingFeedback, record] }));
+    return { alertId: null, pending: true };
   }
-  return null;
+  return { alertId: commit(record), pending: false };
+}
+
+/** Sends every pending rating if there is connection. Keeps the original date and time. */
+export function flushPending(): number {
+  const pending = useDemoStore.getState().pendingFeedback;
+  if (!pending.length || !isOnline()) return 0;
+  useDemoStore.setState({ pendingFeedback: [] });
+  for (const record of pending) commit(record);
+  return pending.length;
 }

@@ -131,7 +131,8 @@ export function TabletsPage() {
         </Table>
         <p className="mt-3 text-sm text-slate-500">
           El cajero en sesión se cambia desde la propia tableta, con el PIN de esa tableta. La sesión no se cierra sola: el turno
-          es el tiempo entre un cambio de cajero y el siguiente.
+          es el tiempo entre un cambio de cajero y el siguiente. Si se cae el internet, la tableta guarda la calificación en espera
+          y reintenta enviarla sola hasta lograrlo.
         </p>
       </Card>
 
@@ -152,7 +153,7 @@ export function TabletsPage() {
         )}
         <div className="mt-3 flex flex-wrap gap-2 text-sm text-slate-500">
           Cada código es de un solo uso. <ToDefine>vigencia del código</ToDefine>
-          <ToDefine>qué pasa si la tableta pierde internet</ToDefine>
+          <ToDefine>cada cuánto reintenta enviar si se cae el internet (en la demo, cada 10 s)</ToDefine>
         </div>
       </Card>
 

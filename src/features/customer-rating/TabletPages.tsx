@@ -9,6 +9,7 @@ import { branchName, RATINGS } from '../../lib/lookup';
 import type { Rating, Tablet } from '../../mock/types';
 import { useDb, useDemoStore } from '../../store/useDemoStore';
 import { CashierCorner, CashierPicker, startCashierSession } from './CashierSession';
+import { ConnectionStatus, OfflineToggle } from './Offline';
 import { saveFeedback } from './saveFeedback';
 
 const RESET_SECONDS = 8;
@@ -31,7 +32,14 @@ function TabletShell({ children, branch, corner }: { children: ReactNode; branch
         <Link to="/" className="hover:underline">
           Salir de la vista de tableta (solo en la demo)
         </Link>
+        {corner && (
+          <>
+            <span className="mx-2">·</span>
+            <OfflineToggle />
+          </>
+        )}
       </footer>
+      {corner && <ConnectionStatus />}
     </div>
   );
 }
@@ -193,6 +201,7 @@ export function CustomerFormPage() {
   const [whatHappened, setWhatHappened] = useState('');
   const [phone, setPhone] = useState('');
   const [alertId, setAlertId] = useState<string | null>(null);
+  const [pendingSend, setPendingSend] = useState(false);
   const [seconds, setSeconds] = useState(RESET_SECONDS);
 
   const restart = () => {
@@ -204,6 +213,7 @@ export function CustomerFormPage() {
     setWhatHappened('');
     setPhone('');
     setAlertId(null);
+    setPendingSend(false);
     setSeconds(RESET_SECONDS);
   };
 
@@ -226,7 +236,9 @@ export function CustomerFormPage() {
   );
 
   const finish = (r: Rating, extra: Parameters<typeof saveFeedback>[1] = { rating: r }) => {
-    setAlertId(saveFeedback(tablet, { ...extra, rating: r }));
+    const result = saveFeedback(tablet, { ...extra, rating: r });
+    setAlertId(result.alertId);
+    setPendingSend(result.pending);
     setSeconds(RESET_SECONDS);
     setStep('thanks');
   };
@@ -373,6 +385,12 @@ export function CustomerFormPage() {
       <Button variant="ghost" className="mt-2" onClick={restart}>
         Volver al inicio ahora
       </Button>
+      {pendingSend && (
+        <Note tone="warning" className="mt-8 max-w-lg">
+          <strong>Solo para la demo:</strong> no hay conexión. La calificación quedó en espera con su fecha y hora, y se envía sola en
+          cuanto vuelva el internet. El cliente no tiene que hacer nada.
+        </Note>
+      )}
       {alertId && (
         <Note tone="warning" className="mt-8 max-w-lg">
           <strong>Solo para la demo:</strong> esta respuesta generó una alerta inmediata por correo al administrador.{' '}

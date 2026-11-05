@@ -135,10 +135,10 @@ function createCashierSessions(): CashierSession[] {
 /** Example rating mix per cashier, so the turns show different results. */
 const CASHIER_RATING_MIX: Record<string, [Rating, number][]> = {
   e02: [['excelente', 55], ['bien', 28], ['regular', 10], ['mal', 7]],
-  e03: [['excelente', 26], ['bien', 32], ['regular', 25], ['mal', 17]],
+  e03: [['excelente', 18], ['bien', 26], ['regular', 32], ['mal', 24]],
   e06: [['excelente', 38], ['bien', 30], ['regular', 18], ['mal', 14]],
   e10: [['excelente', 46], ['bien', 30], ['regular', 14], ['mal', 10]],
-  e13: [['excelente', 30], ['bien', 32], ['regular', 22], ['mal', 16]],
+  e13: [['excelente', 22], ['bien', 28], ['regular', 28], ['mal', 22]],
   e12: [['excelente', 40], ['bien', 30], ['regular', 18], ['mal', 12]],
 };
 

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { nowIso } from '../lib/dates';
 import { createSeed } from '../mock/seed';
-import type { EmailKind, MockDb } from '../mock/types';
+import type { CustomerFeedback, EmailKind, MockDb } from '../mock/types';
 
 interface DemoState {
   db: MockDb;
@@ -12,6 +12,10 @@ interface DemoState {
   deviceTabletId: string | null;
   /** Email preview currently open (not persisted). */
   openEmailId: string | null;
+  /** Ratings taken on this tablet while there was no connection, waiting to be sent. */
+  pendingFeedback: CustomerFeedback[];
+  /** Demo switch to simulate that the tablet lost its internet connection. */
+  simulateOffline: boolean;
 
   login: (userId: string) => void;
   logout: () => void;
@@ -21,6 +25,7 @@ interface DemoState {
   queueEmail: (kind: EmailKind, refId: string, open?: boolean) => string;
   openEmail: (id: string | null) => void;
   setDeviceTablet: (tabletId: string | null) => void;
+  setSimulateOffline: (value: boolean) => void;
   resetDemo: () => void;
 }
 
@@ -37,6 +42,8 @@ export const useDemoStore = create<DemoState>()(
       sessionUserId: null,
       deviceTabletId: null,
       openEmailId: null,
+      pendingFeedback: [],
+      simulateOffline: false,
 
       login: (userId) => set({ sessionUserId: userId }),
       logout: () => set({ sessionUserId: null }),
@@ -62,13 +69,20 @@ export const useDemoStore = create<DemoState>()(
         set({ openEmailId: id });
       },
       setDeviceTablet: (tabletId) => set({ deviceTabletId: tabletId }),
-      resetDemo: () => set({ db: createSeed(), deviceTabletId: null, openEmailId: null }),
+      setSimulateOffline: (value) => set({ simulateOffline: value }),
+      resetDemo: () => set({ db: createSeed(), deviceTabletId: null, openEmailId: null, pendingFeedback: [], simulateOffline: false }),
     }),
     {
       name: 'inolite-prototipo-v2',
       version: 1,
       storage: createJSONStorage(() => localStorage),
-      partialize: (s) => ({ db: s.db, sessionUserId: s.sessionUserId, deviceTabletId: s.deviceTabletId }),
+      partialize: (s) => ({
+        db: s.db,
+        sessionUserId: s.sessionUserId,
+        deviceTabletId: s.deviceTabletId,
+        pendingFeedback: s.pendingFeedback,
+        simulateOffline: s.simulateOffline,
+      }),
     },
   ),
 );
