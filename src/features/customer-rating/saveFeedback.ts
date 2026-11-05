@@ -5,7 +5,8 @@ import { useDemoStore } from '../../store/useDemoStore';
 
 export interface FeedbackInput {
   rating: Rating;
-  praisedEmployeeIds?: string[];
+  /** «¿Quieres felicitar a quien te atendió?» answered Sí: the praise goes to the cashier in session. */
+  praiseCashier?: boolean;
   comment?: string;
   complaint?: Complaint;
 }
@@ -45,15 +46,16 @@ export interface SaveResult {
 /** Saves one customer submission. Without connection it waits and is retried later. */
 export function saveFeedback(tablet: Tablet, input: FeedbackInput): SaveResult {
   const store = useDemoStore.getState();
+  // Linked to the cashier in session on this tablet right now.
+  const cashierId = currentSession(store.db, tablet.id)?.employeeId;
   const record: CustomerFeedback = {
     id: `cf-${Date.now().toString(36)}`,
     branchId: tablet.branchId,
     tabletId: tablet.id,
-    // Linked to the cashier in session on this tablet right now.
-    cashierId: currentSession(store.db, tablet.id)?.employeeId,
+    cashierId,
     createdAt: nowIso(),
     rating: input.rating,
-    praisedEmployeeIds: input.rating === 'excelente' ? input.praisedEmployeeIds ?? [] : [],
+    praisedEmployeeIds: input.rating === 'excelente' && input.praiseCashier && cashierId ? [cashierId] : [],
   };
   if (input.rating === 'excelente' && input.comment?.trim()) record.comment = input.comment.trim();
   const complaint = input.rating === 'mal' || input.rating === 'muy_mal' ? clean(input.complaint) : undefined;

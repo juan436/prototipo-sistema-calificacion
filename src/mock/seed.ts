@@ -144,7 +144,7 @@ const CASHIER_RATING_MIX: Record<string, [Rating, number][]> = {
 
 const REGISTERS_BY_BRANCH: Record<BranchId, [string, string]> = { ferreisla: ['t1', 't4'], lagloria: ['t2', 't5'] };
 
-function createCustomerFeedback(users: User[], sessions: CashierSession[]): CustomerFeedback[] {
+function createCustomerFeedback(sessions: CashierSession[]): CustomerFeedback[] {
   const rnd = createRandom(20260801);
   const records: Omit<CustomerFeedback, 'id'>[] = [];
   const start = '2026-08-01';
@@ -166,15 +166,8 @@ function createCustomerFeedback(users: User[], sessions: CashierSession[]): Cust
         praisedEmployeeIds: [],
       };
       if (rating === 'excelente') {
-        const staff = staffAt(users, branch.id, date).filter((u) => u.id !== ANNEX_EMPLOYEE_ID && u.position !== 'Administrativo');
-        if (rnd.next() < 0.6) {
-          const first = rnd.pick(staff);
-          record.praisedEmployeeIds.push(first.id);
-          if (rnd.next() < 0.25) {
-            const second = rnd.pick(staff.filter((s) => s.id !== first.id));
-            record.praisedEmployeeIds.push(second.id);
-          }
-        }
+        // «¿Quieres felicitar a quien te atendió?» answered Sí: the praise goes to the cashier in session.
+        if (cashierId && cashierId !== ANNEX_EMPLOYEE_ID && rnd.next() < 0.6) record.praisedEmployeeIds.push(cashierId);
         if (rnd.next() < 0.45) record.comment = rnd.pick(PRAISE_COMMENTS);
       }
       records.push(record);
@@ -456,7 +449,7 @@ export function createSeed(): MockDb {
   const users = createUsers();
   const forms = createForms();
   const cashierSessions = createCashierSessions();
-  const customerFeedback = createCustomerFeedback(users, cashierSessions);
+  const customerFeedback = createCustomerFeedback(cashierSessions);
   const performance = createPerformance(users, forms);
   const { periods, participation, responses } = createSurvey(users);
   const { reports, acts } = createDisciplinary();
