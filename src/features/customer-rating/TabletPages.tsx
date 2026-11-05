@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { CheckCircle2, KeyRound, TabletSmartphone } from 'lucide-react';
 import { DemoBanner } from '../../components/DemoBanner';
+import { RatingFace } from '../../components/RatingFace';
 import { LogoPlaceholder } from '../../components/LogoPlaceholder';
 import { Button, inputClass, Note } from '../../components/ui';
 import { nowIso } from '../../lib/dates';
@@ -248,19 +249,16 @@ export function CustomerFormPage() {
     return (
       <TabletShell branch={branch.name} corner={corner}>
         <h1 className="text-center text-2xl font-semibold text-slate-900 sm:text-4xl">¿Cómo fue tu experiencia en {branch.questionName}?</h1>
-        <div className="mt-6 grid w-full max-w-5xl sm:mt-10 grid-cols-1 gap-4 landscape:grid-cols-5">
+        <div className="mt-8 grid w-full max-w-4xl grid-cols-5 gap-2 sm:mt-12 sm:gap-4">
           {RATINGS.map((r) => (
             <button
               key={r.id}
               type="button"
               onClick={() => choose(r.id)}
-              style={{ background: r.color, color: r.text }}
-              className="flex items-center gap-5 rounded-3xl px-6 py-5 text-left shadow-sm transition hover:brightness-95 active:scale-[0.98] focus:outline-none focus-visible:ring-4 focus-visible:ring-slate-400 focus-visible:ring-offset-2 landscape:flex-col landscape:py-5 landscape:text-center lg:landscape:py-8"
+              className="group flex flex-col items-center gap-2 rounded-2xl px-1 py-3 transition hover:bg-slate-50 active:scale-95 focus:outline-none focus-visible:ring-4 focus-visible:ring-accent-200 sm:gap-3 sm:py-5"
             >
-              <span className="text-4xl sm:text-5xl lg:landscape:text-6xl" aria-hidden>
-                {r.emoji}
-              </span>
-              <span className="text-2xl font-semibold">{r.label}</span>
+              <RatingFace rating={r.id} className="aspect-square w-full max-w-[128px] transition group-hover:scale-105" />
+              <span className="whitespace-nowrap text-xs font-semibold text-slate-700 min-[400px]:text-sm sm:text-xl">{r.label}</span>
             </button>
           ))}
         </div>
