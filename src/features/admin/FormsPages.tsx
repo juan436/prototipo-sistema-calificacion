@@ -37,6 +37,10 @@ export function FormsListPage() {
         title="Formularios"
         subtitle="Un formulario por tipo, sin departamentos. Se agregan, quitan y reordenan preguntas sin programador."
       />
+      <Note className="mb-4">
+        <strong>Cambio pedido por el cliente:</strong> el desempeño ya no usa un solo formulario. Cada rol tiene su cuestionario:
+        vendedores (meta de venta), cajeros (satisfacción del cliente) y administrativos (sin ventas ni clientes).
+      </Note>
       <Note className="mb-6">
         <strong>Versionado:</strong> un formulario que ya tiene respuestas no se edita. Al guardar cambios se crea una versión
         nueva y la anterior queda intacta. Cada evaluación guarda la versión con la que se hizo.

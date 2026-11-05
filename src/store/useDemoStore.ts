@@ -65,7 +65,7 @@ export const useDemoStore = create<DemoState>()(
       resetDemo: () => set({ db: createSeed(), deviceTabletId: null, openEmailId: null }),
     }),
     {
-      name: 'inolite-prototipo-v1',
+      name: 'inolite-prototipo-v2',
       version: 1,
       storage: createJSONStorage(() => localStorage),
       partialize: (s) => ({ db: s.db, sessionUserId: s.sessionUserId, deviceTabletId: s.deviceTabletId }),

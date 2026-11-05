@@ -188,7 +188,10 @@ export function CustomerFormPage() {
 
   if (!tablet) return <NotAuthorized />;
   const branch = db.branches.find((b) => b.id === tablet.branchId)!;
-  const staff = db.users.filter((u) => u.role === 'employee' && u.active && u.branchId === tablet.branchId);
+  // Sales and cashier staff of the branch (administrative staff does not attend customers).
+  const staff = db.users.filter(
+    (u) => u.role === 'employee' && u.active && u.branchId === tablet.branchId && (u.position === 'Ventas' || u.position === 'Caja'),
+  );
 
   const finish = (r: Rating, extra: Parameters<typeof saveFeedback>[1] = { rating: r }) => {
     setAlertId(saveFeedback(tablet, { ...extra, rating: r }));

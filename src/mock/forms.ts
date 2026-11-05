@@ -22,7 +22,10 @@ const agreementScale: QuestionOption[] = [
 export const FORM_IDS = {
   customer: 'form-customer',
   anonymous: 'form-anonymous',
+  /** Performance questionnaire for sales staff (keeps the two versions of the demo). */
   performance: 'form-performance',
+  performanceCashier: 'form-performance-cashier',
+  performanceAdmin: 'form-performance-admin',
   disciplinary: 'form-disciplinary',
   act: 'form-act',
 } as const;
@@ -84,15 +87,17 @@ export function createForms(): FormDefinition[] {
     {
       id: FORM_IDS.performance,
       type: 'performance',
-      name: 'Evaluación de desempeño (gerente a empleado)',
+      name: 'Desempeño · Vendedores',
       description:
-        'La calificación oficial del mes se calcula solo con este formulario. Tiene dos versiones para mostrar el versionado.',
+        'Cuestionario de los vendedores, basado en la meta de venta. Tiene dos versiones para mostrar el versionado.',
       editable: true,
+      position: 'Ventas',
       versions: [
         {
           version: 1,
           createdAt: '2026-07-01T09:00:00',
           questions: [
+            { id: 'p-goal-1', area: 'Meta de venta', type: 'scored', weight: 3, text: 'Cumplimiento de su meta de venta del mes.', options: performanceScale },
             { id: 'p-cust-1', area: 'Atención al cliente', type: 'scored', weight: 2, text: 'Saluda y atiende al cliente con amabilidad.', options: performanceScale },
             { id: 'p-cust-2', area: 'Atención al cliente', type: 'scored', weight: 1, text: 'Resuelve las dudas del cliente sobre los productos.', options: performanceScale },
             { id: 'p-punct-1', area: 'Puntualidad y asistencia', type: 'scored', weight: 2, text: 'Llega a tiempo y cumple su horario.', options: performanceScale },
@@ -104,12 +109,55 @@ export function createForms(): FormDefinition[] {
           version: 2,
           createdAt: '2026-09-01T09:00:00',
           questions: [
+            { id: 'p-goal-1', area: 'Meta de venta', type: 'scored', weight: 3, text: 'Cumplimiento de su meta de venta del mes.', options: performanceScale },
             { id: 'p-cust-1', area: 'Atención al cliente', type: 'scored', weight: 2, text: 'Saluda y atiende al cliente con amabilidad.', options: performanceScale },
             { id: 'p-cust-2', area: 'Atención al cliente', type: 'scored', weight: 2, text: 'Resuelve las dudas del cliente y le recomienda productos.', options: performanceScale },
             { id: 'p-punct-1', area: 'Puntualidad y asistencia', type: 'scored', weight: 2, text: 'Llega a tiempo y cumple su horario.', options: performanceScale },
             { id: 'p-team-1', area: 'Trabajo en equipo', type: 'scored', weight: 1, text: 'Colabora con sus compañeros.', options: performanceScale },
             { id: 'p-know-1', area: 'Conocimiento del producto', type: 'scored', weight: 1, text: 'Conoce los productos y dónde se encuentran.', options: performanceScale },
             { id: 'p-order-1', area: 'Orden y limpieza', type: 'scored', weight: 1, text: 'Mantiene su área de trabajo ordenada y limpia.', options: performanceScale },
+          ],
+        },
+      ],
+    },
+    {
+      id: FORM_IDS.performanceCashier,
+      type: 'performance',
+      name: 'Desempeño · Cajeros',
+      description: 'Cuestionario de los cajeros, basado en la satisfacción del cliente.',
+      editable: true,
+      position: 'Caja',
+      versions: [
+        {
+          version: 1,
+          createdAt: '2026-07-01T09:00:00',
+          questions: [
+            { id: 'k-sat-1', area: 'Satisfacción del cliente', type: 'scored', weight: 3, text: 'Satisfacción de los clientes que atendió en sus turnos.', options: performanceScale },
+            { id: 'k-cash-1', area: 'Atención en caja', type: 'scored', weight: 2, text: 'Cobra con rapidez, con amabilidad y sin errores.', options: performanceScale },
+            { id: 'k-punct-1', area: 'Puntualidad y asistencia', type: 'scored', weight: 2, text: 'Llega a tiempo y cumple su horario.', options: performanceScale },
+            { id: 'k-team-1', area: 'Trabajo en equipo', type: 'scored', weight: 1, text: 'Colabora con sus compañeros.', options: performanceScale },
+            { id: 'k-order-1', area: 'Orden y limpieza', type: 'scored', weight: 1, text: 'Mantiene la caja ordenada y el corte cuadrado.', options: performanceScale },
+          ],
+        },
+      ],
+    },
+    {
+      id: FORM_IDS.performanceAdmin,
+      type: 'performance',
+      name: 'Desempeño · Administrativos',
+      description: 'Cuestionario del personal administrativo, sin ventas ni clientes.',
+      editable: true,
+      position: 'Administrativo',
+      versions: [
+        {
+          version: 1,
+          createdAt: '2026-07-01T09:00:00',
+          questions: [
+            { id: 'm-quality-1', area: 'Calidad del trabajo', type: 'scored', weight: 2, text: 'Entrega su trabajo completo y sin errores.', options: performanceScale },
+            { id: 'm-time-1', area: 'Cumplimiento', type: 'scored', weight: 2, text: 'Cumple sus tareas en el tiempo acordado.', options: performanceScale },
+            { id: 'm-punct-1', area: 'Puntualidad y asistencia', type: 'scored', weight: 1, text: 'Llega a tiempo y cumple su horario.', options: performanceScale },
+            { id: 'm-team-1', area: 'Trabajo en equipo', type: 'scored', weight: 1, text: 'Colabora con las sucursales y con sus compañeros.', options: performanceScale },
+            { id: 'm-comm-1', area: 'Comunicación', type: 'scored', weight: 1, text: 'Informa a tiempo y con claridad.', options: performanceScale },
           ],
         },
       ],

@@ -8,7 +8,8 @@ export interface Branch {
 }
 
 export type Role = 'admin' | 'manager' | 'employee';
-export type Position = 'Ventas' | 'Caja' | 'Gerencia' | 'Administración';
+/** Ventas = vendedor, Caja = cajero, Administrativo = staff with no sales nor customers. */
+export type Position = 'Ventas' | 'Caja' | 'Administrativo' | 'Gerencia' | 'Administración';
 
 export interface BranchAssignment {
   branchId: BranchId;
@@ -81,6 +82,8 @@ export interface FormDefinition {
   name: string;
   description: string;
   editable: boolean;
+  /** Performance forms only: the role (position) this questionnaire is for. */
+  position?: Position;
   versions: FormVersion[];
 }
 

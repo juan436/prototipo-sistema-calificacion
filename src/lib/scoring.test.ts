@@ -21,10 +21,10 @@ describe('computeScore', () => {
 
   it('applies the weights of the version', () => {
     const v1 = performance.versions[0];
-    // Weight 2 question best, everything else worst: 2 / 7 * 10
+    // Weight 2 question best, everything else worst: 2 / 10 * 10
     const answers = Object.fromEntries(v1.questions.map((q) => [q.id, 4]));
     answers['p-cust-1'] = 0;
-    expect(computeScore(v1, answers).grade).toBe(2.9);
+    expect(computeScore(v1, answers).grade).toBe(2);
   });
 
   it('groups the scores by area', () => {

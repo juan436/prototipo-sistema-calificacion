@@ -1,14 +1,13 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { allScoredAnswered, FormRenderer, type Answers } from '../../components/FormRenderer';
-import { Button, Card, ExampleTag, Field, GradeBadge, inputClass, Note, PageHeader, Select } from '../../components/ui';
+import { Badge, Button, Card, ExampleTag, Field, GradeBadge, inputClass, Note, PageHeader, Select, ToDefine } from '../../components/ui';
 import { formatMonthTitle, monthRange, nowIso } from '../../lib/dates';
-import { latestVersion, versionLabel } from '../../lib/forms';
+import { latestVersion, performanceFormFor, versionLabel } from '../../lib/forms';
 import { branchName } from '../../lib/lookup';
 import { canSeeEmployee } from '../../lib/permissions';
 import { computeScore } from '../../lib/scoring';
 import { annexesFor, hasAnnexes } from '../../lib/stats';
-import { FORM_IDS } from '../../mock/forms';
 import { useCurrentUser, useDb, useDemoStore } from '../../store/useDemoStore';
 import { AnnexesPanel } from './AnnexesPanel';
 
@@ -28,10 +27,11 @@ export function CapturePage() {
   const [observations, setObservations] = useState('');
   const [comments, setComments] = useState('');
 
-  const form = db.forms.find((f) => f.id === FORM_IDS.performance)!;
+  const employee = employees.find((e) => e.id === employeeId);
+  // Each role (vendedor, cajero, administrativo) has its own questionnaire.
+  const form = (employee && performanceFormFor(db, employee)) || db.forms.find((f) => f.type === 'performance')!;
   const version = latestVersion(form);
   const score = useMemo(() => computeScore(version, answers), [version, answers]);
-  const employee = employees.find((e) => e.id === employeeId);
   const existing = db.performance.find((e) => e.employeeId === employeeId && e.period === period);
   const complete = allScoredAnswered(version, answers);
   const annexes = employee ? annexesFor(db, employee.id, period) : null;
@@ -73,10 +73,16 @@ export function CapturePage() {
           <Card>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Empleado" hint={user.role === 'manager' ? 'Solo aparecen tus empleados.' : undefined}>
-                <Select value={employeeId} onChange={(e) => setEmployeeId(e.target.value)}>
+                <Select
+                  value={employeeId}
+                  onChange={(e) => {
+                    setEmployeeId(e.target.value);
+                    setAnswers({});
+                  }}
+                >
                   {employees.map((e) => (
                     <option key={e.id} value={e.id}>
-                      {e.name} · {branchName(db, e.branchId)}
+                      {e.name} · {e.position} · {branchName(db, e.branchId)}
                     </option>
                   ))}
                 </Select>
@@ -91,9 +97,20 @@ export function CapturePage() {
                 </Select>
               </Field>
             </div>
-            <p className="mt-3 text-xs text-slate-500">
-              Se usa la {versionLabel(db, form.id, version.version).toLowerCase()}.
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-slate-600">
+              <span>Cuestionario:</span>
+              <Badge tone="accent">{form.name}</Badge>
+              <span className="text-xs text-slate-500">{versionLabel(db, form.id, version.version)}</span>
+            </div>
+            <p className="mt-2 text-xs text-slate-500">
+              Cada rol tiene su propio cuestionario: vendedores (meta de venta), cajeros (satisfacción del cliente) y administrativos
+              (sin ventas ni clientes).
             </p>
+            {employee?.position === 'Ventas' && (
+              <div className="mt-2">
+                <ToDefine>de dónde sale la meta de venta de cada vendedor</ToDefine>
+              </div>
+            )}
           </Card>
 
           {existing ? (

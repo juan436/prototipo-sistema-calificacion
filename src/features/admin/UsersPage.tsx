@@ -145,6 +145,7 @@ export function UsersPage() {
               <Select value={position} onChange={(e) => setPosition(e.target.value as Position)}>
                 <option value="Ventas">Ventas</option>
                 <option value="Caja">Caja</option>
+                <option value="Administrativo">Administrativo</option>
               </Select>
             </Field>
             <Field label="Sucursal">

@@ -124,7 +124,7 @@ function createCustomerFeedback(users: User[]): CustomerFeedback[] {
         praisedEmployeeIds: [],
       };
       if (rating === 'excelente') {
-        const staff = staffAt(users, branch.id, date).filter((u) => u.id !== ANNEX_EMPLOYEE_ID);
+        const staff = staffAt(users, branch.id, date).filter((u) => u.id !== ANNEX_EMPLOYEE_ID && u.position !== 'Administrativo');
         if (rnd.next() < 0.6) {
           const first = rnd.pick(staff);
           record.praisedEmployeeIds.push(first.id);
@@ -208,14 +208,17 @@ const PERFORMANCE_PERIODS = ['2026-07', '2026-08', '2026-09'];
 
 function createPerformance(users: User[], forms: ReturnType<typeof createForms>): PerformanceEvaluation[] {
   const rnd = createRandom(20260701);
-  const form = forms.find((f) => f.id === FORM_IDS.performance)!;
   const evaluations: PerformanceEvaluation[] = [];
+  // Each role has its own questionnaire (change requested by the client).
+  const formFor = (u: User) => forms.find((f) => f.type === 'performance' && f.position === u.position)!;
   const staff = users.filter((u) => u.role === 'employee');
 
   for (const employee of staff) {
     const skill = rnd.int(2, 4); // base level in points (0..4)
+    const form = formFor(employee);
     for (const period of PERFORMANCE_PERIODS) {
-      const version = period < '2026-09' ? form.versions[0] : form.versions[1];
+      // The sales questionnaire changed in September (version 2); the others have one version.
+      const version = period < '2026-09' || form.versions.length === 1 ? form.versions[0] : form.versions[1];
       const branchId = branchAt(employee, `${period}-28`)!;
       const answers: Record<string, number> = {};
       for (const q of version.questions) {
@@ -244,13 +247,13 @@ function createPerformance(users: User[], forms: ReturnType<typeof createForms>)
 
   // The modified evaluation: punctuality was first rated low and was later clarified.
   const modified = evaluations.find((e) => e.employeeId === MODIFIED_EMPLOYEE_ID && e.period === '2026-09')!;
-  const v2 = form.versions[1];
-  modified.answers['p-punct-1'] = 3; // Deficiente
-  modified.answers['p-cust-1'] = 1;
-  modified.grade = computeScore(v2, modified.answers).grade ?? 0;
+  const cashierVersion = forms.find((f) => f.id === modified.formId)!.versions[0];
+  modified.answers['k-punct-1'] = 3; // Deficiente
+  modified.answers['k-cash-1'] = 1;
+  modified.grade = computeScore(cashierVersion, modified.answers).grade ?? 0;
   const originalGrade = modified.grade;
-  modified.answers['p-punct-1'] = 1; // Bueno
-  modified.grade = computeScore(v2, modified.answers).grade ?? 0;
+  modified.answers['k-punct-1'] = 1; // Bueno
+  modified.grade = computeScore(cashierVersion, modified.answers).grade ?? 0;
   modified.changes.push({
     at: '2026-10-06T11:20:00',
     userId: MANAGER_FERREISLA_ID,
